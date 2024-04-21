@@ -30,6 +30,10 @@ const wallet = [
 const headless = false;
 const mailToSend = "konradwiel@interia.pl";
 
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function checkPrice(wallet) {
     const browser = await puppeteer.launch({ headless: headless });
 
@@ -41,8 +45,9 @@ async function checkPrice(wallet) {
         try {
             await page.goto(token.link, {
                 waitUntil: "networkidle2",
-                timeout: 440000,
+                timeout: 60000,
             });
+            sleep(3000)
             let html = await page.evaluate(() => document.body.innerHTML);
             const $ = cheerio.load(html);
 
@@ -87,7 +92,7 @@ async function sendMail(sumTotalValues) {
         let info = await transporter.sendMail({
             from: '"KW" <infokwbot@gmail.com>',
             to: `${mailToSend}`,
-            subject: `$ ${sumTotalValues}`,
+            subject: `$ ${sumTotalValues.toFixed(2)}`,
         });
 
         console.log(`Message Sent to KW`, info.messageId);
