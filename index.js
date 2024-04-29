@@ -10,12 +10,14 @@ const wallet = [
         symbol: "btc",
         link: "https://coinmarketcap.com/currencies/bitcoin/",
         amount: 0.008,
+        lowPrice: 52,
     },
     {
         id: 2,
         symbol: "babypepe",
         link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
         amount: 0,
+        lowPrice: 0.000002334,
     },
 ];
 
@@ -60,6 +62,15 @@ async function checkPrice(wallet) {
                     sumTotalValues += totalValue;
                 }
             });
+
+            // Jeśli lowPrice jest zdefiniowane w portfelu, aktualizuj token
+            if (token.lowPrice !== undefined) {
+                token.lowPriceReached =
+                    articles.find((article) => article.title === token.symbol)
+                        ?.pln <= token.lowPrice;
+            } else {
+                token.lowPriceReached = false; // Ustaw lowPriceReached na false, jeśli lowPrice nie jest zdefiniowane
+            }
         } catch (error) {
             console.log(error);
         } finally {
@@ -69,8 +80,7 @@ async function checkPrice(wallet) {
 
     await browser.close();
     console.log(articles);
-    let babyPepe = articles[1].pln;
-    return { sumTotalValues, articles, babyPepe };
+    return { sumTotalValues, articles };
 }
 
 async function sendMail(sumTotalValues) {
@@ -120,8 +130,7 @@ async function loadSumTotalValues() {
     }
 }
 
-// Funkcja do porównywania sumy wartości i wysyłania maila
-async function compareAndSendMail(sumTotalValues, babyPepe) {
+async function compareAndSendMail(sumTotalValues, wallet) {
     // Odczytaj zapisaną sumę wartości
     const savedSumTotalValues = await loadSumTotalValues();
 
@@ -130,13 +139,13 @@ async function compareAndSendMail(sumTotalValues, babyPepe) {
         Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) *
         100;
 
-    // Jeśli różnica jest większa niż 1%, wyślij maila
-    if (differencePercentage > 1) {
-        await sendMail(sumTotalValues);
-        // Zapisz nową sumę wartości
-        await saveSumTotalValues(sumTotalValues);
-    }
-    if (babyPepe <= 0.000002334) {
+    // Sprawdź, czy któraś moneta osiągnęła swoją wartość lowPrice
+    const coinBelowLowPrice = wallet.some(
+        (token) => token.pln < token.lowPrice
+    );
+
+    // Jeśli różnica jest większa niż 1% lub któraś z wartości lowPrice została osiągnięta, wyślij maila
+    if (differencePercentage > 1 || coinBelowLowPrice) {
         await sendMail(sumTotalValues);
         // Zapisz nową sumę wartości
         await saveSumTotalValues(sumTotalValues);
@@ -147,7 +156,7 @@ async function startSection() {
     try {
         const { sumTotalValues } = await checkPrice(wallet);
         console.log(sumTotalValues);
-        await compareAndSendMail(sumTotalValues);
+        await compareAndSendMail(sumTotalValues, wallet);
     } catch (error) {
         console.error(error);
     }
