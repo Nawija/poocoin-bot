@@ -4,30 +4,25 @@ const nodemailer = require("nodemailer");
 const CronJob = require("cron").CronJob;
 const fs = require("fs");
 
+let sumTotalValues = 0;
+const articles = [];
+
 const wallet = [
     {
-        symbol: "sakai",
-        link: "https://poocoin.app/tokens/0x43b35e89d15b91162dea1c51133c4c93bdd1c4af",
-        amount: 61.16,
+        id: 1,
+        symbol: "btcb",
+        link: "https://coinmarketcap.com/currencies/bitcoin/",
+        amount: 0.008,
     },
     {
-        symbol: "baby",
-        link: "https://poocoin.app/tokens/0x88da9901b3a02fe24e498e1ed683d2310383e295",
-        amount: 18391142219542.5128,
-    },
-    {
-        symbol: "bnb",
-        link: "https://poocoin.app/tokens/0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
-        amount: 0.04,
-    },
-    {
-        symbol: "shoki",
-        link: "https://poocoin.app/tokens/0x2ddb89a10bf2020d8cae7c5d239b6f38be9d91d9",
-        amount: 75682967.3795,
+        id: 2,
+        symbol: "babypepe",
+        link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
+        amount: 0,
     },
 ];
 
-const headless = false;
+const headless = true;
 const mailToSend = "konradwiel@interia.pl";
 
 function sleep(ms) {
@@ -37,9 +32,6 @@ function sleep(ms) {
 async function checkPrice(wallet) {
     const browser = await puppeteer.launch({ headless: headless });
 
-    let sumTotalValues = 0;
-    const articles = [];
-
     for (const token of wallet) {
         const page = await browser.newPage();
         try {
@@ -47,15 +39,15 @@ async function checkPrice(wallet) {
                 waitUntil: "networkidle2",
                 timeout: 60000,
             });
-            sleep(3000)
+            sleep(3000);
             let html = await page.evaluate(() => document.body.innerHTML);
             const $ = cheerio.load(html);
 
-            $("div.d-flex.align-items-start.flex-wrap", html).each(function () {
-                const title = $(this).find("h1").text();
-                const plnText = $(this).find("span").text();
-                const pln = parseFloat(plnText.replace("$", "").trim());
-
+            $("#section-coin-overview", html).each(function () {
+                const title = $(this).find("h1 > span").text();
+                const plnText = $(this).find("div > span").text();
+                const pln = parseInt(plnText.replace(/[^\d.]/g, ""), 10);
+                console.log(plnText);
                 // Pomnóż cenę przez ilość w portfelu
                 const totalValue = pln * token.amount;
 
@@ -76,10 +68,9 @@ async function checkPrice(wallet) {
     }
 
     await browser.close();
-    return { sumTotalValues, articles };
 }
 
-async function sendMail(sumTotalValues) {
+async function sendMail(sumTotalValues, articles) {
     let transporter = nodemailer.createTransport({
         service: `gmail`,
         auth: {
@@ -92,20 +83,37 @@ async function sendMail(sumTotalValues) {
         let info = await transporter.sendMail({
             from: '"KW" <infokwbot@gmail.com>',
             to: `${mailToSend}`,
-            subject: `$ ${sumTotalValues.toFixed(2)}`,
+            subject: `Wallet $${sumTotalValues.toFixed(2)}`,
+            html: htmlMailTemplate(articles),
         });
 
-        console.log(`Message Sent to KW`, info.messageId);
+        console.log(`Message Sent`, info.messageId);
     } catch (error) {
         console.error("Error sending email:", error);
     }
 }
 
+function htmlMailTemplate(articles) {
+    return articles
+        .map(
+            (article) => `<table>
+    <tr>
+        <td>{title}</td>
+        <td>{pln}}</td>
+    </tr>
+</table>`
+        )
+        .join("");
+}
+
 // Funkcja do zapisywania sumy wartości do pliku JSON
 async function saveSumTotalValues(sumTotalValues) {
     try {
-        await fs.promises.writeFile("sumTotalValues.json", JSON.stringify({ sumTotalValues }));
-        console.log("SumTotalValues saved to file.");
+        await fs.promises.writeFile(
+            "data.json",
+            JSON.stringify({ sumTotalValues })
+        );
+        console.log("Saved new data");
     } catch (error) {
         console.error("Error saving SumTotalValues:", error);
     }
@@ -114,7 +122,7 @@ async function saveSumTotalValues(sumTotalValues) {
 // Funkcja do odczytywania sumy wartości z pliku JSON
 async function loadSumTotalValues() {
     try {
-        const data = await fs.promises.readFile("sumTotalValues.json");
+        const data = await fs.promises.readFile("data.json");
         const { sumTotalValues: savedSumTotalValues } = JSON.parse(data);
         return savedSumTotalValues;
     } catch (error) {
@@ -127,13 +135,16 @@ async function loadSumTotalValues() {
 async function compareAndSendMail(sumTotalValues) {
     // Odczytaj zapisaną sumę wartości
     const savedSumTotalValues = await loadSumTotalValues();
+    const HTML = htmlMailTemplate(articles);
 
     // Oblicz różnicę procentową
-    const differencePercentage = Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) * 100;
+    const differencePercentage =
+        Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) *
+        100;
 
     // Jeśli różnica jest większa niż 1%, wyślij maila
     if (differencePercentage > 1) {
-        await sendMail(sumTotalValues);
+        await sendMail(sumTotalValues, articles);
         // Zapisz nową sumę wartości
         await saveSumTotalValues(sumTotalValues);
     }
@@ -141,8 +152,7 @@ async function compareAndSendMail(sumTotalValues) {
 
 async function startSection() {
     try {
-        const { sumTotalValues } = await checkPrice(wallet);
-        console.log(sumTotalValues);
+        const sumTotalValues = await checkPrice(wallet);
         await compareAndSendMail(sumTotalValues);
     } catch (error) {
         console.error(error);
