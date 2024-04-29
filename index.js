@@ -6,28 +6,20 @@ const fs = require("fs");
 
 const wallet = [
     {
-        symbol: "sakai",
-        link: "https://poocoin.app/tokens/0x43b35e89d15b91162dea1c51133c4c93bdd1c4af",
-        amount: 61.16,
+        id: 1,
+        symbol: "btc",
+        link: "https://coinmarketcap.com/currencies/bitcoin/",
+        amount: 0.008,
     },
     {
-        symbol: "baby",
-        link: "https://poocoin.app/tokens/0x88da9901b3a02fe24e498e1ed683d2310383e295",
-        amount: 18391142219542.5128,
-    },
-    {
-        symbol: "bnb",
-        link: "https://poocoin.app/tokens/0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
-        amount: 0.04,
-    },
-    {
-        symbol: "shoki",
-        link: "https://poocoin.app/tokens/0x2ddb89a10bf2020d8cae7c5d239b6f38be9d91d9",
-        amount: 75682967.3795,
+        id: 2,
+        symbol: "babypepe",
+        link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
+        amount: 0,
     },
 ];
 
-const headless = false;
+const headless = true;
 const mailToSend = "konradwiel@interia.pl";
 
 function sleep(ms) {
@@ -47,14 +39,14 @@ async function checkPrice(wallet) {
                 waitUntil: "networkidle2",
                 timeout: 60000,
             });
-            sleep(3000)
+            sleep(3000);
             let html = await page.evaluate(() => document.body.innerHTML);
             const $ = cheerio.load(html);
 
-            $("div.d-flex.align-items-start.flex-wrap", html).each(function () {
-                const title = $(this).find("h1").text();
-                const plnText = $(this).find("span").text();
-                const pln = parseFloat(plnText.replace("$", "").trim());
+            $("#section-coin-overview", html).each(function () {
+                const title = $(this).find("h1 > div > span").text();
+                const plnText = $(this).find(".base-text").text();
+                const pln = parseFloat(plnText.replace(/[^\d.]/g, ""));
 
                 // Pomnóż cenę przez ilość w portfelu
                 const totalValue = pln * token.amount;
@@ -76,7 +68,9 @@ async function checkPrice(wallet) {
     }
 
     await browser.close();
-    return { sumTotalValues, articles };
+    console.log(articles);
+    let babyPepe = articles[1].pln;
+    return { sumTotalValues, articles, babyPepe };
 }
 
 async function sendMail(sumTotalValues) {
@@ -104,7 +98,10 @@ async function sendMail(sumTotalValues) {
 // Funkcja do zapisywania sumy wartości do pliku JSON
 async function saveSumTotalValues(sumTotalValues) {
     try {
-        await fs.promises.writeFile("sumTotalValues.json", JSON.stringify({ sumTotalValues }));
+        await fs.promises.writeFile(
+            "sumTotalValues.json",
+            JSON.stringify({ sumTotalValues })
+        );
         console.log("SumTotalValues saved to file.");
     } catch (error) {
         console.error("Error saving SumTotalValues:", error);
@@ -124,15 +121,22 @@ async function loadSumTotalValues() {
 }
 
 // Funkcja do porównywania sumy wartości i wysyłania maila
-async function compareAndSendMail(sumTotalValues) {
+async function compareAndSendMail(sumTotalValues, babyPepe) {
     // Odczytaj zapisaną sumę wartości
     const savedSumTotalValues = await loadSumTotalValues();
 
     // Oblicz różnicę procentową
-    const differencePercentage = Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) * 100;
+    const differencePercentage =
+        Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) *
+        100;
 
     // Jeśli różnica jest większa niż 1%, wyślij maila
     if (differencePercentage > 1) {
+        await sendMail(sumTotalValues);
+        // Zapisz nową sumę wartości
+        await saveSumTotalValues(sumTotalValues);
+    }
+    if (babyPepe <= 0.000002334) {
         await sendMail(sumTotalValues);
         // Zapisz nową sumę wartości
         await saveSumTotalValues(sumTotalValues);
