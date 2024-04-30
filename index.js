@@ -131,7 +131,6 @@ async function checkPrice(wallet) {
     }
 
     await browser.close();
-    console.log(articles);
     return { sumTotalValues, articles };
 }
 
@@ -182,7 +181,7 @@ function generateHTML(articles, sumTotalValues) {
                         <img style="width: 25px; height: 25px; border-radius: 50%;" src="${article.imgSrc}" />
                         <div style="color: #2c3649; padding: 6px; font-weight: 600">${article.title}</div>
                     </td>
-                    <td style="padding: 6px; display: flex;">
+                    <td style="padding: 6px; display: flex; font-size: 17px;">
                         <div style="margin-right: 12px;">${article.pln}</div>
                         <div><a href="${article.link}"
                                 style="padding: 7px; border-radius: 12px; margin-right: 5px; background-color:#3861FB; color: white; text-decoration: none;">CoinM</a>
@@ -270,7 +269,7 @@ async function startSection() {
 async function startCronJob() {
     await startSection();
     const scraping = new CronJob(
-        "*/4 * * * *",
+        "*/5 * * * *",
         async function () {
             await startSection();
         },
