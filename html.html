@@ -9,19 +9,32 @@
 
 <body>
     <table>
-        <tr
-            style="width: 450px; display: flex; justify-content: space-between; align-items: center; font-size: 23px; margin-bottom: 6px; background-color: whitesmoke;">
+        <tr style="width: 450px; display: flex; justify-content: space-between; align-items: center; font-size: 20px; margin-bottom: 6px; background-color: ${
+                        article.title === tokenTitle
+                            ? " lightgreen" : "whitesmoke" };">
             <td style="padding: 6px; display: flex; align-items: center;">
-                <img style="width: 25px; height: 25px; border-radius: 50%;" src="${article.imgSrc}" />
-                <div style="color: #2c3649; padding: 6px; font-weight: 600">${article.title}</div>
+                <img style="width: 25px; height: 25px; border-radius: 50%;" src="${
+                            article.imgSrc
+                        }" />
+                <div style="color: #2c3649; padding: 6px; font-weight: 600">${
+                    article.title
+                    }</div>
+                    <p style="color: ${article.dataChangeColor}; font-size:17px;">${article.dataChange}</p>
             </td>
-            <td style="padding: 6px; display: flex;">
-                <div style="margin-right: 12px;">${article.pln}</div>
+            <td style="padding: 6px; display: flex; align-items: center; font-size: 17px;">
+                <div style="margin-right: 9px; font-size: 14px; font-weight: 600;">
+
+                        <p>${article.pln}</p>
+
+
+                    <p style="color:red; margin: -12px 0;">${article.lowPrice}
+                    <p>
+                </div>
                 <div><a href="${article.link}"
-                        style="padding: 6px; border-radius: 12px; margin-right: 5px; background-color:#3861FB; color: white; text-decoration: none;">CoinM</a>
+                        style="padding: 7px; border-radius: 12px; margin-right: 5px; background-color:#3861FB; color: white; text-decoration: none;">CoinM</a>
                 </div>
                 <div><a href="${article.poLink}"
-                        style="padding: 6px; border-radius: 12px; background-color: green; color: white; text-decoration: none;">Buy</a>
+                        style="padding: 7px; border-radius: 12px; background-color: green; color: white; text-decoration: none;">Buy</a>
                 </div>
             </td>
         </tr>

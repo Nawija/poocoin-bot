@@ -31,28 +31,28 @@ const wallet = [
         link: "https://coinmarketcap.com/currencies/baby-bonk-coin/",
         poLink: "https://poocoin.app/tokens/0xbb2826ab03b6321e170f0558804f2b6488c98775",
         amount: 0,
-        lowPrice: 0.0002076,
+        lowPrice: 0.002076,
     },
     {
         symbol: "SQUIDGROW",
         link: "https://coinmarketcap.com/currencies/squid-grow/",
         poLink: "https://poocoin.app/tokens/0xd8fa690304d2b2824d918c0c7376e2823704557a",
         amount: 0,
-        lowPrice: 0.0001356,
+        lowPrice: 0.001356,
     },
     {
         symbol: "BABYGROK",
         link: "https://coinmarketcap.com/currencies/baby-grok-bsc/",
         poLink: "https://poocoin.app/tokens/0x88da9901b3a02fe24e498e1ed683d2310383e295",
         amount: 0,
-        lowPrice: 0.0001006,
+        lowPrice: 0.001006,
     },
     {
         symbol: "BabyDoge",
         link: "https://coinmarketcap.com/currencies/baby-doge-coin/",
         poLink: "https://poocoin.app/tokens/0xc748673057861a797275cd8a068abb95a902e8de",
         amount: 0,
-        lowPrice: 0.0001306,
+        lowPrice: 0.001306,
     },
     {
         symbol: "BABYRWA",
@@ -67,6 +67,20 @@ const wallet = [
         poLink: "https://poocoin.app/tokens/0xfe8bf5b8f5e4eb5f9bc2be16303f7dab8cf56aa8",
         amount: 0,
         lowPrice: 0.001036,
+    },
+    {
+        symbol: "FLOKITA",
+        link: "https://coinmarketcap.com/currencies/flokita/",
+        poLink: "https://poocoin.app/tokens/0xdc8c8221b8e27dfda87a6d56dc5899a65087b6f4",
+        amount: 0,
+        lowPrice: 0.00001279,
+    },
+    {
+        symbol: "FLOKI",
+        link: "https://coinmarketcap.com/currencies/floki-inu/",
+        poLink: "https://poocoin.app/tokens/0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
+        amount: 0,
+        lowPrice: 0.000132,
     },
 ];
 
@@ -89,7 +103,7 @@ async function checkPrice(wallet) {
                 waitUntil: "networkidle2",
                 timeout: 60000,
             });
-            sleep(3000);
+            await sleep(8000);
             let html = await page.evaluate(() => document.body.innerHTML);
             const $ = cheerio.load(html);
 
@@ -97,14 +111,20 @@ async function checkPrice(wallet) {
                 let title = $(this).find("h1 > div > span").text();
                 let imgSrc = $(this).find("img").attr("src");
                 let plnText = $(this).find(".base-text").text();
+                let dataChangeColor = $(this)
+                    .find("p.sc-4984dd93-0")
+                    .attr("color");
+                let dataChange = $(this).find("p.sc-4984dd93-0").text();
                 console.log(plnText);
                 let pln = parseFloat(plnText.replace(/[^\d.]/g, ""));
                 if (plnText.includes("...")) {
                     plnText = plnText.replace(/\.{3}/g, "");
                     pln = parseFloat(plnText.replace(/[^\d.]/g, ""));
                 }
+                console.log(pln);
                 const link = token.link;
                 const poLink = token.poLink;
+                const lowPrice = token.lowPrice;
                 const totalValue = pln * token.amount;
 
                 const articleExists = articles.some(
@@ -113,12 +133,15 @@ async function checkPrice(wallet) {
 
                 if (!articleExists) {
                     articles.push({
+                        imgSrc,
                         title,
                         pln,
+                        lowPrice,
                         link,
                         poLink,
-                        imgSrc,
                         totalValue,
+                        dataChangeColor,
+                        dataChange,
                     });
                     sumTotalValues += totalValue;
                 }
@@ -156,7 +179,7 @@ async function sendMail(sumTotalValues, articles, tokenTitle = null) {
             from: '"KW" <infokwbot@gmail.com>',
             to: `${mailToSend}`,
             subject: subject,
-            html: generateHTML(articles, sumTotalValues),
+            html: generateHTML(articles, sumTotalValues, tokenTitle),
         });
 
         console.log(`Message Sent to KW`, info.messageId);
@@ -164,8 +187,7 @@ async function sendMail(sumTotalValues, articles, tokenTitle = null) {
         console.error("Error sending email:", error);
     }
 }
-
-function generateHTML(articles, sumTotalValues) {
+function generateHTML(articles, sumTotalValues, tokenTitle) {
     return `
         <p style="text-align: start; font-size: 25px; font-weight: 700;">Wallet $${sumTotalValues.toFixed(
             2
@@ -175,22 +197,37 @@ function generateHTML(articles, sumTotalValues) {
             .map(
                 (article) => `
                 
-                <tr
-                    style="width: 450px; display: flex; justify-content: space-between; align-items: center; font-size: 20px; margin-bottom: 6px; background-color: whitesmoke;">
-                    <td style="padding: 6px; display: flex; align-items: center;">
-                        <img style="width: 25px; height: 25px; border-radius: 50%;" src="${article.imgSrc}" />
-                        <div style="color: #2c3649; padding: 6px; font-weight: 600">${article.title}</div>
-                    </td>
-                    <td style="padding: 6px; display: flex; font-size: 17px;">
-                        <div style="margin-right: 12px;">${article.pln}</div>
-                        <div><a href="${article.link}"
-                                style="padding: 7px; border-radius: 12px; margin-right: 5px; background-color:#3861FB; color: white; text-decoration: none;">CoinM</a>
-                        </div>
-                        <div><a href="${article.poLink}"
-                                style="padding: 7px; border-radius: 12px; background-color: green; color: white; text-decoration: none;">Buy</a>
-                        </div>
-                    </td>
-                </tr>
+                <tr style="width: 450px; display: flex; justify-content: space-between; align-items: center; font-size: 20px; margin-bottom: 6px; background-color: ${
+                    article.title === tokenTitle ? " lightgreen" : "whitesmoke"
+                };">
+        <td style="padding: 6px; display: flex; align-items: center;">
+            <img style="width: 25px; height: 25px; border-radius: 50%;" src="${
+                article.imgSrc
+            }" />
+            <div style="color: #2c3649; padding: 6px; font-weight: 600">${
+                article.title
+            }</div>
+                <p style="color: ${
+                    article.dataChangeColor
+                }; font-size:14px; font-weight: 600">${article.dataChange}</p>
+        </td>
+        <td style="padding: 6px; display: flex; align-items: center; font-size: 17px;">
+            <div style="margin-right: 9px; font-size: 14px; font-weight: 600;">
+
+                    <p>${article.pln}</p>
+
+
+                <p style="color:red; margin: -12px 0;">${article.lowPrice}
+                <p>
+            </div>
+            <div><a href="${article.link}"
+                    style="padding: 7px; border-radius: 12px; margin-right: 5px; background-color:#3861FB; color: white; text-decoration: none;">CoinM</a>
+            </div>
+            <div><a href="${article.poLink}"
+                    style="padding: 7px; border-radius: 12px; background-color: green; color: white; text-decoration: none;">Buy</a>
+            </div>
+        </td>
+    </tr>
                 `
             )
             .join("")}
@@ -228,7 +265,12 @@ async function compareAndSendMail(sumTotalValues, articles, wallet) {
         Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) *
         100;
 
-    // Sprawdź, czy któraś moneta osiągnęła swoją wartość lowPrice
+    // const formattedWallet = wallet.map((token) => ({
+    //     ...token,
+    //     amount: token.amount.toFixed(3), // Zaokrąglamy do 3 miejsc dziesiętnych
+    //     lowPrice: token.lowPrice.toFixed(3), // Zaokrąglamy do 3 miejsc dziesiętnych
+    // }));
+    // console.log(formattedWallet);
     const coinBelowLowPrice = wallet.some(
         (token) =>
             articles.find((article) => article.title === token.symbol)?.pln <
