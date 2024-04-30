@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <table>
+        <tr
+            style="width: 450px; display: flex; justify-content: space-between; align-items: center; font-size: 23px; margin-bottom: 6px; background-color: whitesmoke;">
+            <td style="padding: 6px; display: flex; align-items: center;">
+                <img style="width: 25px; height: 25px; border-radius: 50%;" src="${article.imgSrc}" />
+                <div style="color: #2c3649; padding: 6px; font-weight: 600">${article.title}</div>
+            </td>
+            <td style="padding: 6px; display: flex;">
+                <div style="margin-right: 12px;">${article.pln}</div>
+                <div><a href="${article.link}"
+                        style="padding: 6px; border-radius: 12px; margin-right: 5px; background-color:#3861FB; color: white; text-decoration: none;">CoinM</a>
+                </div>
+                <div><a href="${article.poLink}"
+                        style="padding: 6px; border-radius: 12px; background-color: green; color: white; text-decoration: none;">Buy</a>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
