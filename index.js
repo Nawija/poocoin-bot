@@ -120,7 +120,8 @@ async function checkPrice(wallet) {
                 if (plnText.includes("...")) {
                     plnText = plnText.replace(/\.{3}/g, "");
                     let lastFourDigits = plnText.slice(-4); // Extract last four digits
-                    pln = parseInt(lastFourDigits);
+                    let formattedPln = lastFourDigits.padStart(4, "0"); // Add leading zeros if necessary
+                    pln = parseFloat(formattedPln);
                 }
                 console.log(pln);
                 const link = token.link;
