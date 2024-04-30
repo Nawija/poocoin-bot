@@ -31,42 +31,42 @@ const wallet = [
         link: "https://coinmarketcap.com/currencies/baby-bonk-coin/",
         poLink: "https://poocoin.app/tokens/0xbb2826ab03b6321e170f0558804f2b6488c98775",
         amount: 0,
-        lowPrice: 0.002076,
+        lowPrice: 2045,
     },
     {
         symbol: "SQUIDGROW",
         link: "https://coinmarketcap.com/currencies/squid-grow/",
         poLink: "https://poocoin.app/tokens/0xd8fa690304d2b2824d918c0c7376e2823704557a",
         amount: 0,
-        lowPrice: 0.001356,
+        lowPrice: 1356,
     },
     {
         symbol: "BABYGROK",
         link: "https://coinmarketcap.com/currencies/baby-grok-bsc/",
         poLink: "https://poocoin.app/tokens/0x88da9901b3a02fe24e498e1ed683d2310383e295",
         amount: 0,
-        lowPrice: 0.001006,
+        lowPrice: 1006,
     },
     {
         symbol: "BabyDoge",
         link: "https://coinmarketcap.com/currencies/baby-doge-coin/",
         poLink: "https://poocoin.app/tokens/0xc748673057861a797275cd8a068abb95a902e8de",
         amount: 0,
-        lowPrice: 0.001306,
+        lowPrice: 1306,
     },
     {
         symbol: "BABYRWA",
         link: "https://coinmarketcap.com/currencies/babyrwa/",
         poLink: "https://poocoin.app/tokens/0x4a8049c015ae1c6665fc9e49f053458ae3a102d0",
         amount: 0,
-        lowPrice: 0.001806,
+        lowPrice: 1806,
     },
     {
         symbol: "BIBI",
         link: "https://coinmarketcap.com/currencies/bibi/",
         poLink: "https://poocoin.app/tokens/0xfe8bf5b8f5e4eb5f9bc2be16303f7dab8cf56aa8",
         amount: 0,
-        lowPrice: 0.001036,
+        lowPrice: 1036,
     },
     {
         symbol: "FLOKITA",
@@ -103,7 +103,7 @@ async function checkPrice(wallet) {
                 waitUntil: "networkidle2",
                 timeout: 60000,
             });
-            await sleep(8000);
+            await sleep(1000);
             let html = await page.evaluate(() => document.body.innerHTML);
             const $ = cheerio.load(html);
 
@@ -119,7 +119,8 @@ async function checkPrice(wallet) {
                 let pln = parseFloat(plnText.replace(/[^\d.]/g, ""));
                 if (plnText.includes("...")) {
                     plnText = plnText.replace(/\.{3}/g, "");
-                    pln = parseFloat(plnText.replace(/[^\d.]/g, ""));
+                    let lastFourDigits = plnText.slice(-4); // Extract last four digits
+                    pln = parseInt(lastFourDigits);
                 }
                 console.log(pln);
                 const link = token.link;
