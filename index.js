@@ -15,13 +15,19 @@ const wallet = [
         symbol: "BABYPEPE",
         link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
         amount: 0,
-        lowPrice: 0.000002534,
+        lowPrice: 0.000002035,
     },
     {
         symbol: "SAKAI",
         link: "https://coinmarketcap.com/currencies/sakai-vault/",
         amount: 0,
-        lowPrice: 3.2,
+        lowPrice: 3.1,
+    },
+    {
+        symbol: "BABYBONK",
+        link: "https://coinmarketcap.com/pl/currencies/baby-bonk-coin/",
+        amount: 0,
+        lowPrice: 0.001076,
     },
 ];
 
@@ -54,7 +60,6 @@ async function checkPrice(wallet) {
                 const plnText = $(this).find(".base-text").text();
                 const pln = parseFloat(plnText.replace(/[^\d.]/g, ""));
 
-                // Pomnóż cenę przez ilość w portfelu
                 const totalValue = pln * token.amount;
 
                 const articleExists = articles.some(
@@ -78,7 +83,15 @@ async function checkPrice(wallet) {
     return { sumTotalValues, articles };
 }
 
-async function sendMail(sumTotalValues, articles) {
+async function sendMail(sumTotalValues, articles, tokenTitle = null) {
+    let subject;
+    if (tokenTitle) {
+        subject = `Buy ${tokenTitle}`;
+    } else {
+        subject = `Wallet $${sumTotalValues.toFixed(2)} | PLN ${
+            sumTotalValues.toFixed(2) * 4
+        }`;
+    }
     let transporter = nodemailer.createTransport({
         service: `gmail`,
         auth: {
@@ -91,10 +104,8 @@ async function sendMail(sumTotalValues, articles) {
         let info = await transporter.sendMail({
             from: '"KW" <infokwbot@gmail.com>',
             to: `${mailToSend}`,
-            subject: `Wallet $${sumTotalValues.toFixed(2)} | PLN ${
-                sumTotalValues.toFixed(2) * 4
-            }`,
-            html: generateHTML(articles),
+            subject: subject,
+            html: generateHTML(articles, sumTotalValues),
         });
 
         console.log(`Message Sent to KW`, info.messageId);
@@ -103,20 +114,26 @@ async function sendMail(sumTotalValues, articles) {
     }
 }
 
-function generateHTML(articles) {
-    return articles
-        .map(
-            (article) => `
-        <table>
-            <tr>
-                <td>${article.title}</td>
-                <td>${article.pln}</td>
-            </tr>
-        </table>
-    `
-        )
-        .join("");
+function generateHTML(articles, sumTotalValues) {
+    return `
+        <p>Wallet $${sumTotalValues.toFixed(2)} | PLN ${
+        sumTotalValues.toFixed(2) * 4
+    }</p>
+        ${articles
+            .map(
+                (article) => `
+            <table>
+                <tr style="width: 300px; display: flex; justify-content: space-between; align-items: center; font-size: 20px; margin-bottom: 6px; background-color: whitesmoke;">
+                    <td style="background-color: #2c3649; padding: 6px; color: white;">${article.title}</td>
+                    <td style="padding: 6px;">${article.pln}</td>
+                </tr>
+            </table>
+        `
+            )
+            .join("")}
+    `;
 }
+
 async function saveSumTotalValues(sumTotalValues) {
     try {
         await fs.promises.writeFile(
@@ -154,9 +171,23 @@ async function compareAndSendMail(sumTotalValues, articles, wallet) {
             token.lowPrice
     );
 
-    // Jeśli różnica jest większa niż 0.5% lub któraś z wartości lowPrice została osiągnięta, wyślij maila
     if (differencePercentage > 0.5 || coinBelowLowPrice) {
-        await sendMail(sumTotalValues, articles);
+        let tokenTitle = null;
+        // Sprawdzamy, czy jakakolwiek moneta osiągnęła swoją wartość lowPrice
+        if (coinBelowLowPrice) {
+            // Jeśli tak, znajdujemy tytuł tej monety
+            const tokenBelowLowPrice = wallet.find((token) =>
+                articles.find(
+                    (article) =>
+                        article.title === token.symbol &&
+                        article.pln < token.lowPrice
+                )
+            );
+            if (tokenBelowLowPrice) {
+                tokenTitle = tokenBelowLowPrice.symbol;
+            }
+        }
+        await sendMail(sumTotalValues, articles, tokenTitle);
         await saveSumTotalValues(sumTotalValues);
     }
 }
@@ -174,7 +205,7 @@ async function startSection() {
 async function startCronJob() {
     await startSection();
     const scraping = new CronJob(
-        "*/1 * * * *",
+        "*/4 * * * *",
         async function () {
             await startSection();
         },
