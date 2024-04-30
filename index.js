@@ -25,13 +25,12 @@ const wallet = [
     },
     {
         symbol: "BABYBONK",
-        link: "https://coinmarketcap.com/pl/currencies/baby-bonk-coin/",
+        link: "https://coinmarketcap.com/currencies/baby-bonk-coin/",
         amount: 0,
         lowPrice: 0.001076,
     },
 ];
 
-const headless = true;
 const mailToSend = "konradwiel@interia.pl";
 
 function sleep(ms) {
@@ -39,7 +38,7 @@ function sleep(ms) {
 }
 
 async function checkPrice(wallet) {
-    const browser = await puppeteer.launch({ headless: headless });
+    const browser = await puppeteer.launch({ headless: true });
 
     let sumTotalValues = 0;
     const articles = [];
@@ -59,7 +58,15 @@ async function checkPrice(wallet) {
                 const title = $(this).find("h1 > div > span").text();
                 const plnText = $(this).find(".base-text").text();
                 const pln = parseFloat(plnText.replace(/[^\d.]/g, ""));
-
+                if (plnText.includes("...")) {
+                    let index = plnText.indexOf("...");
+                    let prefix = plnText.substring(0, index);
+                    let suffix = plnText.substring(index + 3);
+                    suffix = suffix.replace(/\./g, "");
+                    pln = parseFloat(prefix + suffix);
+                }
+                console.log(plnText);
+                console.log(pln);
                 const totalValue = pln * token.amount;
 
                 const articleExists = articles.some(
@@ -71,6 +78,7 @@ async function checkPrice(wallet) {
                     sumTotalValues += totalValue;
                 }
             });
+            await page.click(plnText);
         } catch (error) {
             console.log(error);
         } finally {
