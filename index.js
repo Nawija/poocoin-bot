@@ -6,18 +6,22 @@ const fs = require("fs");
 
 const wallet = [
     {
-        id: 1,
-        symbol: "btc",
+        symbol: "BTC",
         link: "https://coinmarketcap.com/currencies/bitcoin/",
         amount: 0.008,
         lowPrice: 52,
     },
     {
-        id: 2,
-        symbol: "babypepe",
+        symbol: "BABYPEPE",
         link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
         amount: 0,
-        lowPrice: 0.000002334,
+        lowPrice: 0.000002534,
+    },
+    {
+        symbol: "SAKAI",
+        link: "https://coinmarketcap.com/currencies/sakai-vault/",
+        amount: 0,
+        lowPrice: 3.2,
     },
 ];
 
@@ -62,15 +66,6 @@ async function checkPrice(wallet) {
                     sumTotalValues += totalValue;
                 }
             });
-
-            // Jeśli lowPrice jest zdefiniowane w portfelu, aktualizuj token
-            if (token.lowPrice !== undefined) {
-                token.lowPriceReached =
-                    articles.find((article) => article.title === token.symbol)
-                        ?.pln <= token.lowPrice;
-            } else {
-                token.lowPriceReached = false; // Ustaw lowPriceReached na false, jeśli lowPrice nie jest zdefiniowane
-            }
         } catch (error) {
             console.log(error);
         } finally {
@@ -83,7 +78,7 @@ async function checkPrice(wallet) {
     return { sumTotalValues, articles };
 }
 
-async function sendMail(sumTotalValues) {
+async function sendMail(sumTotalValues, articles) {
     let transporter = nodemailer.createTransport({
         service: `gmail`,
         auth: {
@@ -96,7 +91,10 @@ async function sendMail(sumTotalValues) {
         let info = await transporter.sendMail({
             from: '"KW" <infokwbot@gmail.com>',
             to: `${mailToSend}`,
-            subject: `$ ${sumTotalValues.toFixed(2)}`,
+            subject: `Wallet $${sumTotalValues.toFixed(2)} | PLN ${
+                sumTotalValues.toFixed(2) * 4
+            }`,
+            html: generateHTML(articles),
         });
 
         console.log(`Message Sent to KW`, info.messageId);
@@ -105,7 +103,20 @@ async function sendMail(sumTotalValues) {
     }
 }
 
-// Funkcja do zapisywania sumy wartości do pliku JSON
+function generateHTML(articles) {
+    return articles
+        .map(
+            (article) => `
+        <table>
+            <tr>
+                <td>${article.title}</td>
+                <td>${article.pln}</td>
+            </tr>
+        </table>
+    `
+        )
+        .join("");
+}
 async function saveSumTotalValues(sumTotalValues) {
     try {
         await fs.promises.writeFile(
@@ -117,8 +128,6 @@ async function saveSumTotalValues(sumTotalValues) {
         console.error("Error saving SumTotalValues:", error);
     }
 }
-
-// Funkcja do odczytywania sumy wartości z pliku JSON
 async function loadSumTotalValues() {
     try {
         const data = await fs.promises.readFile("sumTotalValues.json");
@@ -130,8 +139,7 @@ async function loadSumTotalValues() {
     }
 }
 
-async function compareAndSendMail(sumTotalValues, wallet) {
-    // Odczytaj zapisaną sumę wartości
+async function compareAndSendMail(sumTotalValues, articles, wallet) {
     const savedSumTotalValues = await loadSumTotalValues();
 
     // Oblicz różnicę procentową
@@ -141,22 +149,23 @@ async function compareAndSendMail(sumTotalValues, wallet) {
 
     // Sprawdź, czy któraś moneta osiągnęła swoją wartość lowPrice
     const coinBelowLowPrice = wallet.some(
-        (token) => token.pln < token.lowPrice
+        (token) =>
+            articles.find((article) => article.title === token.symbol)?.pln <
+            token.lowPrice
     );
 
-    // Jeśli różnica jest większa niż 1% lub któraś z wartości lowPrice została osiągnięta, wyślij maila
-    if (differencePercentage > 1 || coinBelowLowPrice) {
-        await sendMail(sumTotalValues);
-        // Zapisz nową sumę wartości
+    // Jeśli różnica jest większa niż 0.5% lub któraś z wartości lowPrice została osiągnięta, wyślij maila
+    if (differencePercentage > 0.5 || coinBelowLowPrice) {
+        await sendMail(sumTotalValues, articles);
         await saveSumTotalValues(sumTotalValues);
     }
 }
 
 async function startSection() {
     try {
-        const { sumTotalValues } = await checkPrice(wallet);
+        const { sumTotalValues, articles } = await checkPrice(wallet);
         console.log(sumTotalValues);
-        await compareAndSendMail(sumTotalValues, wallet);
+        await compareAndSendMail(sumTotalValues, articles, wallet);
     } catch (error) {
         console.error(error);
     }
