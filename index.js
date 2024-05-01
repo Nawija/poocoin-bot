@@ -10,63 +10,63 @@ const wallet = [
         link: "https://coinmarketcap.com/currencies/bitcoin/",
         poLink: "https://poocoin.app/tokens/0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
         amount: 0.008,
-        lowPrice: 59270.67,
+        lowPrice: 49270.67,
     },
     {
         symbol: "BABYPEPE",
         link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
         poLink: "https://poocoin.app/tokens/0x9d6db6382444b70a51307a4291188f60d4eef205",
         amount: 0,
-        lowPrice: 0.000002035,
+        lowPrice: 0.000001535,
     },
     {
         symbol: "SAKAI",
         link: "https://coinmarketcap.com/currencies/sakai-vault/",
         poLink: "https://poocoin.app/tokens/0x43b35e89d15b91162dea1c51133c4c93bdd1c4af",
         amount: 0,
-        lowPrice: 2.5,
+        lowPrice: 2.0,
     },
     {
         symbol: "BABYBONK",
         link: "https://coinmarketcap.com/currencies/baby-bonk-coin/",
         poLink: "https://poocoin.app/tokens/0xbb2826ab03b6321e170f0558804f2b6488c98775",
         amount: 0,
-        lowPrice: 2045,
+        lowPrice: 0.204,
     },
     {
         symbol: "SQUIDGROW",
         link: "https://coinmarketcap.com/currencies/squid-grow/",
         poLink: "https://poocoin.app/tokens/0xd8fa690304d2b2824d918c0c7376e2823704557a",
         amount: 0,
-        lowPrice: 1356,
+        lowPrice: 0.135,
     },
     {
         symbol: "BABYGROK",
         link: "https://coinmarketcap.com/currencies/baby-grok-bsc/",
         poLink: "https://poocoin.app/tokens/0x88da9901b3a02fe24e498e1ed683d2310383e295",
         amount: 0,
-        lowPrice: 1006,
+        lowPrice: 0.1,
     },
     {
         symbol: "BabyDoge",
         link: "https://coinmarketcap.com/currencies/baby-doge-coin/",
         poLink: "https://poocoin.app/tokens/0xc748673057861a797275cd8a068abb95a902e8de",
         amount: 0,
-        lowPrice: 1306,
+        lowPrice: 0.13,
     },
     {
         symbol: "BABYRWA",
         link: "https://coinmarketcap.com/currencies/babyrwa/",
         poLink: "https://poocoin.app/tokens/0x4a8049c015ae1c6665fc9e49f053458ae3a102d0",
         amount: 0,
-        lowPrice: 1806,
+        lowPrice: 0.18,
     },
     {
         symbol: "BIBI",
         link: "https://coinmarketcap.com/currencies/bibi/",
         poLink: "https://poocoin.app/tokens/0xfe8bf5b8f5e4eb5f9bc2be16303f7dab8cf56aa8",
         amount: 0,
-        lowPrice: 1036,
+        lowPrice: 0.103,
     },
     {
         symbol: "FLOKITA",
@@ -103,7 +103,7 @@ async function checkPrice(wallet) {
                 waitUntil: "networkidle2",
                 timeout: 60000,
             });
-            await sleep(1000);
+            await sleep(500);
             let html = await page.evaluate(() => document.body.innerHTML);
             const $ = cheerio.load(html);
 
@@ -119,9 +119,14 @@ async function checkPrice(wallet) {
                 let pln = parseFloat(plnText.replace(/[^\d.]/g, ""));
                 if (plnText.includes("...")) {
                     plnText = plnText.replace(/\.{3}/g, "");
-                    let lastFourDigits = plnText.slice(-4); // Extract last four digits
-                    let formattedPln = lastFourDigits.padStart(4, "0"); // Add leading zeros if necessary
-                    pln = parseFloat(formattedPln);
+                    let lastFourDigits = plnText.slice(-4);
+                    if (lastFourDigits.slice(-4, -3) === "0") {
+                        lastFourDigits =
+                            lastFourDigits.slice(0, -4) +
+                            lastFourDigits.slice(-3);
+                    }
+                    lastFourDigits = "0." + lastFourDigits;
+                    pln = parseFloat(lastFourDigits);
                 }
                 console.log(pln);
                 const link = token.link;
@@ -313,7 +318,7 @@ async function startSection() {
 async function startCronJob() {
     await startSection();
     const scraping = new CronJob(
-        "*/5 * * * *",
+        "*/7 * * * *",
         async function () {
             await startSection();
         },
