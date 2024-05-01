@@ -4,6 +4,8 @@ const nodemailer = require("nodemailer");
 const CronJob = require("cron").CronJob;
 const fs = require("fs");
 
+let dontSpam = 0;
+
 const wallet = [
     {
         symbol: "BTC",
@@ -272,19 +274,13 @@ async function compareAndSendMail(sumTotalValues, articles, wallet) {
         Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) *
         100;
 
-    // const formattedWallet = wallet.map((token) => ({
-    //     ...token,
-    //     amount: token.amount.toFixed(3), // Zaokrąglamy do 3 miejsc dziesiętnych
-    //     lowPrice: token.lowPrice.toFixed(3), // Zaokrąglamy do 3 miejsc dziesiętnych
-    // }));
-    // console.log(formattedWallet);
     const coinBelowLowPrice = wallet.some(
         (token) =>
             articles.find((article) => article.title === token.symbol)?.pln <
             token.lowPrice
     );
 
-    if (differencePercentage > 0.5 || coinBelowLowPrice) {
+    if (differencePercentage > 0.5 || coinBelowLowPrice && dontSpam < 1) {
         let tokenTitle = null;
         // Sprawdzamy, czy jakakolwiek moneta osiągnęła swoją wartość lowPrice
         if (coinBelowLowPrice) {
@@ -299,6 +295,7 @@ async function compareAndSendMail(sumTotalValues, articles, wallet) {
             if (tokenBelowLowPrice) {
                 tokenTitle = tokenBelowLowPrice.symbol;
             }
+            dontSpam++;
         }
         await sendMail(sumTotalValues, articles, tokenTitle);
         await saveSumTotalValues(sumTotalValues);
@@ -318,7 +315,7 @@ async function startSection() {
 async function startCronJob() {
     await startSection();
     const scraping = new CronJob(
-        "*/7 * * * *",
+        "*/3 * * * *",
         async function () {
             await startSection();
         },
