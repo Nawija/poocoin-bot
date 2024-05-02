@@ -7,83 +7,83 @@ const fs = require("fs");
 let dontSpam = 0;
 
 const wallet = [
-    {
-        symbol: "BTC",
-        link: "https://coinmarketcap.com/currencies/bitcoin/",
-        poLink: "https://poocoin.app/tokens/0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
-        amount: 0.008,
-        lowPrice: 49270.67,
-    },
-    {
-        symbol: "BABYPEPE",
-        link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
-        poLink: "https://poocoin.app/tokens/0x9d6db6382444b70a51307a4291188f60d4eef205",
-        amount: 0,
-        lowPrice: 0.000001535,
-    },
-    {
-        symbol: "SAKAI",
-        link: "https://coinmarketcap.com/currencies/sakai-vault/",
-        poLink: "https://poocoin.app/tokens/0x43b35e89d15b91162dea1c51133c4c93bdd1c4af",
-        amount: 0,
-        lowPrice: 2.0,
-    },
-    {
-        symbol: "BABYBONK",
-        link: "https://coinmarketcap.com/currencies/baby-bonk-coin/",
-        poLink: "https://poocoin.app/tokens/0xbb2826ab03b6321e170f0558804f2b6488c98775",
-        amount: 0,
-        lowPrice: 0.204,
-    },
-    {
-        symbol: "SQUIDGROW",
-        link: "https://coinmarketcap.com/currencies/squid-grow/",
-        poLink: "https://poocoin.app/tokens/0xd8fa690304d2b2824d918c0c7376e2823704557a",
-        amount: 0,
-        lowPrice: 0.135,
-    },
+    // {
+    //     symbol: "BTC",
+    //     link: "https://coinmarketcap.com/currencies/bitcoin/",
+    //     poLink: "https://poocoin.app/tokens/0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
+    //     amount: 0.008,
+    //     lowPrice: 49270.67,
+    // },
+    // {
+    //     symbol: "BABYPEPE",
+    //     link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
+    //     poLink: "https://poocoin.app/tokens/0x9d6db6382444b70a51307a4291188f60d4eef205",
+    //     amount: 0,
+    //     lowPrice: 0.000001535,
+    // },
+    // {
+    //     symbol: "SAKAI",
+    //     link: "https://coinmarketcap.com/currencies/sakai-vault/",
+    //     poLink: "https://poocoin.app/tokens/0x43b35e89d15b91162dea1c51133c4c93bdd1c4af",
+    //     amount: 0,
+    //     lowPrice: 2.0,
+    // },
+    // {
+    //     symbol: "BABYBONK",
+    //     link: "https://coinmarketcap.com/currencies/baby-bonk-coin/",
+    //     poLink: "https://poocoin.app/tokens/0xbb2826ab03b6321e170f0558804f2b6488c98775",
+    //     amount: 0,
+    //     lowPrice: 0.204,
+    // },
+    // {
+    //     symbol: "SQUIDGROW",
+    //     link: "https://coinmarketcap.com/currencies/squid-grow/",
+    //     poLink: "https://poocoin.app/tokens/0xd8fa690304d2b2824d918c0c7376e2823704557a",
+    //     amount: 0,
+    //     lowPrice: 0.1051,
+    // },
     {
         symbol: "BABYGROK",
         link: "https://coinmarketcap.com/currencies/baby-grok-bsc/",
         poLink: "https://poocoin.app/tokens/0x88da9901b3a02fe24e498e1ed683d2310383e295",
         amount: 0,
-        lowPrice: 0.1,
+        lowPrice: 0.1001,
     },
-    {
-        symbol: "BabyDoge",
-        link: "https://coinmarketcap.com/currencies/baby-doge-coin/",
-        poLink: "https://poocoin.app/tokens/0xc748673057861a797275cd8a068abb95a902e8de",
-        amount: 0,
-        lowPrice: 0.13,
-    },
-    {
-        symbol: "BABYRWA",
-        link: "https://coinmarketcap.com/currencies/babyrwa/",
-        poLink: "https://poocoin.app/tokens/0x4a8049c015ae1c6665fc9e49f053458ae3a102d0",
-        amount: 0,
-        lowPrice: 0.18,
-    },
-    {
-        symbol: "BIBI",
-        link: "https://coinmarketcap.com/currencies/bibi/",
-        poLink: "https://poocoin.app/tokens/0xfe8bf5b8f5e4eb5f9bc2be16303f7dab8cf56aa8",
-        amount: 0,
-        lowPrice: 0.103,
-    },
-    {
-        symbol: "FLOKITA",
-        link: "https://coinmarketcap.com/currencies/flokita/",
-        poLink: "https://poocoin.app/tokens/0xdc8c8221b8e27dfda87a6d56dc5899a65087b6f4",
-        amount: 0,
-        lowPrice: 0.00001279,
-    },
-    {
-        symbol: "FLOKI",
-        link: "https://coinmarketcap.com/currencies/floki-inu/",
-        poLink: "https://poocoin.app/tokens/0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
-        amount: 0,
-        lowPrice: 0.000132,
-    },
+    // {
+    //     symbol: "BabyDoge",
+    //     link: "https://coinmarketcap.com/currencies/baby-doge-coin/",
+    //     poLink: "https://poocoin.app/tokens/0xc748673057861a797275cd8a068abb95a902e8de",
+    //     amount: 0,
+    //     lowPrice: 0.13,
+    // },
+    // {
+    //     symbol: "BABYRWA",
+    //     link: "https://coinmarketcap.com/currencies/babyrwa/",
+    //     poLink: "https://poocoin.app/tokens/0x4a8049c015ae1c6665fc9e49f053458ae3a102d0",
+    //     amount: 0,
+    //     lowPrice: 0.18,
+    // },
+    // {
+    //     symbol: "BIBI",
+    //     link: "https://coinmarketcap.com/currencies/bibi/",
+    //     poLink: "https://poocoin.app/tokens/0xfe8bf5b8f5e4eb5f9bc2be16303f7dab8cf56aa8",
+    //     amount: 0,
+    //     lowPrice: 0.103,
+    // },
+    // {
+    //     symbol: "FLOKITA",
+    //     link: "https://coinmarketcap.com/currencies/flokita/",
+    //     poLink: "https://poocoin.app/tokens/0xdc8c8221b8e27dfda87a6d56dc5899a65087b6f4",
+    //     amount: 0,
+    //     lowPrice: 0.00001279,
+    // },
+    // {
+    //     symbol: "FLOKI",
+    //     link: "https://coinmarketcap.com/currencies/floki-inu/",
+    //     poLink: "https://poocoin.app/tokens/0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
+    //     amount: 0,
+    //     lowPrice: 0.000102,
+    // },
 ];
 
 const mailToSend = "konradwiel@interia.pl";
@@ -130,7 +130,10 @@ async function checkPrice(wallet) {
                     lastFourDigits = "0." + lastFourDigits;
                     pln = parseFloat(lastFourDigits);
                 }
-                console.log(pln);
+                console.log(
+                    `Price: ` + pln + " | " + `Low Price: ` + token.lowPrice
+                );
+                console.log("-----------------------------------");
                 const link = token.link;
                 const poLink = token.poLink;
                 const lowPrice = token.lowPrice;
@@ -198,7 +201,7 @@ async function sendMail(sumTotalValues, articles, tokenTitle = null) {
 }
 function generateHTML(articles, sumTotalValues, tokenTitle) {
     return `
-        <p style="text-align: start; font-size: 25px; font-weight: 700;">Wallet $${sumTotalValues.toFixed(
+        <p style="text-align: center; font-size: 25px; font-weight: 800;">Wallet $${sumTotalValues.toFixed(
             2
         )} | PLN ${sumTotalValues.toFixed(2) * 4}</p>
         <table>
@@ -206,7 +209,7 @@ function generateHTML(articles, sumTotalValues, tokenTitle) {
             .map(
                 (article) => `
                 
-                <tr style="width: 450px; display: flex; justify-content: space-between; align-items: center; font-size: 20px; margin-bottom: 6px; background-color: ${
+                <tr style="width: 450px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; margin-bottom: 6px; background-color: ${
                     article.title === tokenTitle ? " lightgreen" : "whitesmoke"
                 };">
         <td style="padding: 6px; display: flex; align-items: center;">
@@ -221,7 +224,7 @@ function generateHTML(articles, sumTotalValues, tokenTitle) {
                 }; font-size:14px; font-weight: 600">${article.dataChange}</p>
         </td>
         <td style="padding: 6px; display: flex; align-items: center; font-size: 17px;">
-            <div style="margin-right: 9px; font-size: 14px; font-weight: 600;">
+            <div style="margin-right: 9px; font-size: 13px; font-weight: 600; margin-top: -6px;">
 
                     <p>${article.pln}</p>
 
@@ -280,7 +283,7 @@ async function compareAndSendMail(sumTotalValues, articles, wallet) {
             token.lowPrice
     );
 
-    if (differencePercentage > 0.5 || coinBelowLowPrice && dontSpam < 1) {
+    if (differencePercentage > 0.5 || (coinBelowLowPrice && dontSpam < 1)) {
         let tokenTitle = null;
         // Sprawdzamy, czy jakakolwiek moneta osiągnęła swoją wartość lowPrice
         if (coinBelowLowPrice) {
