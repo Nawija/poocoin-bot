@@ -10,20 +10,14 @@ const articles = [];
 const wallet = [
     {
         id: 1,
-        symbol: "btcb",
-        link: "https://coinmarketcap.com/currencies/bitcoin/",
-        amount: 0.008,
-    },
-    {
-        id: 2,
-        symbol: "babypepe",
-        link: "https://coinmarketcap.com/currencies/baby-pepe-io/",
-        amount: 0,
+        symbol: "1MBABYDOGE",
+        link: "https://coinmarketcap.com/currencies/1m-baby-doge-coin/",
+        amount: 279863491200.894699897,
     },
 ];
 
-const headless = true;
-const mailToSend = "konradwiel@interia.pl";
+const headless = false;
+const mailToSend = "seovileo@gmail.com";
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
