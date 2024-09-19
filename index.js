@@ -10,13 +10,13 @@ const articles = [];
 const wallet = [
     {
         id: 1,
-        symbol: "1MBABYDOGE",
+        symbol: "BABYDOGE",
         link: "https://coinmarketcap.com/currencies/1m-baby-doge-coin/",
         amount: 279863491200.894699897,
     },
 ];
 
-const headless = false;
+const headless = true;
 const mailToSend = "seovileo@gmail.com";
 
 function sleep(ms) {
@@ -33,16 +33,15 @@ async function checkPrice(wallet) {
                 waitUntil: "networkidle2",
                 timeout: 60000,
             });
-            sleep(3000);
+            await sleep(3000); // Poprawka: Dodałem 'await' do sleep
             let html = await page.evaluate(() => document.body.innerHTML);
             const $ = cheerio.load(html);
 
             $("#section-coin-overview", html).each(function () {
                 const title = $(this).find("h1 > span").text();
                 const plnText = $(this).find("div > span").text();
-                const pln = parseInt(plnText.replace(/[^\d.]/g, ""), 10);
+                const pln = parseFloat(plnText.replace(/[^\d.]/g, "")); // Poprawka: Zmieniono parseInt na parseFloat
                 console.log(plnText);
-                // Pomnóż cenę przez ilość w portfelu
                 const totalValue = pln * token.amount;
 
                 const articleExists = articles.some(
@@ -62,6 +61,7 @@ async function checkPrice(wallet) {
     }
 
     await browser.close();
+    return sumTotalValues; // Poprawka: Zwracanie sumTotalValues
 }
 
 async function sendMail(sumTotalValues, articles) {
@@ -92,15 +92,14 @@ function htmlMailTemplate(articles) {
         .map(
             (article) => `<table>
     <tr>
-        <td>{title}</td>
-        <td>{pln}}</td>
+        <td>${article.title}</td> 
+        <td>${article.pln}</td>  
     </tr>
 </table>`
         )
         .join("");
 }
 
-// Funkcja do zapisywania sumy wartości do pliku JSON
 async function saveSumTotalValues(sumTotalValues) {
     try {
         await fs.promises.writeFile(
@@ -113,7 +112,6 @@ async function saveSumTotalValues(sumTotalValues) {
     }
 }
 
-// Funkcja do odczytywania sumy wartości z pliku JSON
 async function loadSumTotalValues() {
     try {
         const data = await fs.promises.readFile("data.json");
@@ -125,21 +123,17 @@ async function loadSumTotalValues() {
     }
 }
 
-// Funkcja do porównywania sumy wartości i wysyłania maila
 async function compareAndSendMail(sumTotalValues) {
-    // Odczytaj zapisaną sumę wartości
     const savedSumTotalValues = await loadSumTotalValues();
-    const HTML = htmlMailTemplate(articles);
+    htmlMailTemplate(articles);
 
-    // Oblicz różnicę procentową
     const differencePercentage =
         Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) *
         100;
 
-    // Jeśli różnica jest większa niż 1%, wyślij maila
-    if (differencePercentage > 1) {
+    if (differencePercentage >= 2 || differencePercentage >= 5) {
+        // Poprawka: Zmiana na >= 1% lub >= 4%
         await sendMail(sumTotalValues, articles);
-        // Zapisz nową sumę wartości
         await saveSumTotalValues(sumTotalValues);
     }
 }
