@@ -24,44 +24,60 @@ function sleep(ms) {
 }
 
 async function checkPrice(wallet) {
-    const browser = await puppeteer.launch({ headless: headless });
+    const browser = await puppeteer.launch({
+        headless: headless,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"], // Opcje poprawiające stabilność
+    });
 
-    for (const token of wallet) {
-        const page = await browser.newPage();
-        try {
-            await page.goto(token.link, {
-                waitUntil: "networkidle2",
-                timeout: 60000,
-            });
-            await sleep(3000); // Poprawka: Dodałem 'await' do sleep
-            let html = await page.evaluate(() => document.body.innerHTML);
-            const $ = cheerio.load(html);
+    try {
+        for (const token of wallet) {
+            const page = await browser.newPage();
+            try {
+                await page.goto(token.link, {
+                    waitUntil: "networkidle2",
+                    timeout: 60000,
+                });
+                await sleep(3000);
+                let html = await page.evaluate(() => document.body.innerHTML);
+                const $ = cheerio.load(html);
 
-            $("#section-coin-overview", html).each(function () {
-                const title = $(this).find("h1 > span").text();
-                const plnText = $(this).find("div > span").text();
-                const pln = parseFloat(plnText.replace(/[^\d.]/g, "")); // Poprawka: Zmieniono parseInt na parseFloat
-                console.log(plnText);
-                const totalValue = pln * token.amount;
+                $("#section-coin-overview", html).each(function () {
+                    const title = $(this).find("h1 > span").text();
+                    const plnText = $(this).find("div > span").text();
 
-                const articleExists = articles.some(
-                    (article) => article.title === title && article.pln === pln
-                );
+                    // Wyrażenie regularne do wyodrębnienia liczby po znaku dolara
+                    const plnMatch = plnText.match(/\$([0-9.]+)/);
 
-                if (!articleExists) {
-                    articles.push({ title, pln, totalValue });
-                    sumTotalValues += totalValue;
-                }
-            });
-        } catch (error) {
-            console.log(error);
-        } finally {
-            await page.close();
+                    // Jeśli znaleziono dopasowanie, wyciągnij liczbę jako float
+                    const pln = plnMatch ? parseFloat(plnMatch[1]) : 0;
+
+                    console.log(plnText);
+                    console.log("Cena w PLN: ", pln);
+                    const totalValue = pln * token.amount;
+
+                    const articleExists = articles.some(
+                        (article) =>
+                            article.title === title && article.pln === pln
+                    );
+
+                    if (!articleExists) {
+                        articles.push({ title, pln, totalValue });
+                        sumTotalValues += totalValue;
+                    }
+                });
+            } catch (error) {
+                console.log(error);
+            } finally {
+                await page.close();
+            }
         }
+    } catch (error) {
+        console.error("Error in checkPrice:", error);
+    } finally {
+        await browser.close(); // Zapewnij zamknięcie przeglądarki
     }
 
-    await browser.close();
-    return sumTotalValues; // Poprawka: Zwracanie sumTotalValues
+    return sumTotalValues;
 }
 
 async function sendMail(sumTotalValues, articles) {
@@ -131,8 +147,8 @@ async function compareAndSendMail(sumTotalValues) {
         Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) *
         100;
 
-    if (differencePercentage >= 2 || differencePercentage >= 5) {
-        // Poprawka: Zmiana na >= 1% lub >= 4%
+    if (differencePercentage >= 2) {
+        // Zmiana na jeden warunek >= 2%
         await sendMail(sumTotalValues, articles);
         await saveSumTotalValues(sumTotalValues);
     }
