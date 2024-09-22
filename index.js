@@ -29,6 +29,8 @@ async function checkPrice(wallet) {
         args: ["--no-sandbox", "--disable-setuid-sandbox"], // Opcje poprawiające stabilność
     });
 
+    let totalValues = 0; // Miejscowa zmienna na sumę wartości portfela
+
     try {
         for (const token of wallet) {
             const page = await browser.newPage();
@@ -62,7 +64,7 @@ async function checkPrice(wallet) {
 
                     if (!articleExists) {
                         articles.push({ title, pln, totalValue });
-                        sumTotalValues += totalValue;
+                        totalValues += totalValue;
                     }
                 });
             } catch (error) {
@@ -74,10 +76,10 @@ async function checkPrice(wallet) {
     } catch (error) {
         console.error("Error in checkPrice:", error);
     } finally {
-        await browser.close(); // Zapewnij zamknięcie przeglądarki
+        await browser.close();
     }
 
-    return sumTotalValues;
+    return totalValues;
 }
 
 async function sendMail(sumTotalValues, articles) {
@@ -130,27 +132,38 @@ async function saveSumTotalValues(sumTotalValues) {
 
 async function loadSumTotalValues() {
     try {
+        if (!fs.existsSync("data.json")) {
+            return null; // Jeśli plik nie istnieje, zwracamy null
+        }
         const data = await fs.promises.readFile("data.json");
         const { sumTotalValues: savedSumTotalValues } = JSON.parse(data);
         return savedSumTotalValues;
     } catch (error) {
         console.error("Error loading SumTotalValues:", error);
-        return 0;
+        return null;
     }
 }
 
 async function compareAndSendMail(sumTotalValues) {
     const savedSumTotalValues = await loadSumTotalValues();
-    htmlMailTemplate(articles);
+
+    // Jeśli pierwszy raz uruchamiane, zapisz wartość i zakończ
+    if (savedSumTotalValues === null) {
+        console.log("Zapisywanie sumTotalValues po raz pierwszy");
+        await saveSumTotalValues(sumTotalValues);
+        return;
+    }
 
     const differencePercentage =
         Math.abs((sumTotalValues - savedSumTotalValues) / savedSumTotalValues) *
         100;
 
     if (differencePercentage >= 2) {
-        // Zmiana na jeden warunek >= 2%
+        // Jeśli różnica >= 2%, wysyłamy maila i zapisujemy nową wartość
         await sendMail(sumTotalValues, articles);
         await saveSumTotalValues(sumTotalValues);
+    } else {
+        console.log("Zmiana ceny poniżej 2%, brak akcji");
     }
 }
 
