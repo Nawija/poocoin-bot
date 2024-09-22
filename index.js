@@ -12,7 +12,7 @@ const wallet = [
         id: 1,
         symbol: "BABYDOGE",
         link: "https://coinmarketcap.com/currencies/1m-baby-doge-coin/",
-        amount: 279863491200.894699897,
+        amount: 279000,
     },
 ];
 
