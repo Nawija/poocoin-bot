@@ -4,11 +4,16 @@ import { initDb } from "@/lib/db";
 
 export async function DELETE(
     _req: Request,
-    { params }: { params: { id: string } }
+    {
+        params,
+    }: {
+        params: Promise<{ id: string }>;
+    }
 ) {
     await initDb();
 
-    const id = params.id;
+    const awaitedParams = await Promise.resolve(params);
+    const { id } = awaitedParams;
 
     try {
         await sql`DELETE FROM claims WHERE id = ${id}`;
