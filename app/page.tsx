@@ -71,7 +71,7 @@ export default function HomePage() {
     }
 
     return (
-        <div className="mx-auto p-6 flex items-start justify-center max-w-7xl space-x-8">
+        <div className="mx-auto p-6 flex md:items-start md:justify-center md:flex-row flex-col items-center justify-center max-w-7xl md:space-x-8 md:space-y-0 space-y-8">
             {/* FORMULARZ */}
             <section className="w-full ">
                 <h2 className="text-xl font-semibold mb-4">
