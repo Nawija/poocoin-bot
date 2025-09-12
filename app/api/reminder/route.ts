@@ -36,7 +36,7 @@ export async function GET() {
                 subject: `Przypomnienie: Reklamacja klienta ${claim.name} zbliża się do końca`,
                 text: `Reklamacja od ${claim.name} (${claim.email})\nOpis: ${
                     claim.description
-                }\nKończy się za ${diffDays} dni: ${due.toLocaleDateString()}`,
+                }\nReklamacja ma ${diffDays} dni i nie została odrzucona`,
             });
             sentCount++;
         }
