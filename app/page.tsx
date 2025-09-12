@@ -1,5 +1,5 @@
 "use client";
-import { Trash2, TriangleAlert } from "lucide-react";
+import { Clock4, Trash2, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -143,18 +143,34 @@ export default function HomePage() {
                                 }
                                 required
                             />
-                            <input
-                                type="date"
-                                className="border border-zinc-300/90 rounded px-3 py-2"
-                                value={form.due_date}
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        due_date: e.target.value,
-                                    })
-                                }
-                                required
-                            />
+                            <div className="flex gap-2 items-center">
+                                <input
+                                    type="date"
+                                    className="border border-zinc-300/90 rounded px-3 py-2 w-full"
+                                    value={form.due_date}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            due_date: e.target.value,
+                                        })
+                                    }
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setForm({
+                                            ...form,
+                                            due_date: new Date()
+                                                .toISOString()
+                                                .split("T")[0],
+                                        })
+                                    }
+                                    className="px-3 py-2 border border-yellow-500 text-white rounded cursor-pointer bg-yellow-500 hover:bg-yellow-500 transition"
+                                >
+                                    <Clock4 />
+                                </button>
+                            </div>
 
                             <div className="flex items-center gap-3">
                                 <button
@@ -183,7 +199,7 @@ export default function HomePage() {
                                     }
                                     className="px-4 py-2 border border-zinc-300/90 rounded cursor-pointer"
                                 >
-                                    Wyczyść
+                                    <span>Wyczyść</span>
                                 </button>
                             </div>
                         </form>
@@ -245,7 +261,7 @@ export default function HomePage() {
                                                                   (1000 *
                                                                       60 *
                                                                       60 *
-                                                                      24) 
+                                                                      24)
                                                           );
 
                                                       let colorClass =
