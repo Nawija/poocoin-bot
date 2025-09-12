@@ -33,7 +33,7 @@ export async function GET() {
             await transporter.sendMail({
                 from: `"System Reklamacji" <${process.env.EMAIL_USER}>`,
                 to: "reklamacje.siedlce@mebloo.pl",
-                subject: `Przypomnienie: Reklamacja klienta ${claim.name} zbliża się do końca`,
+                subject: `Reklamacja klienta ${claim.name} zbliża się do końca`,
                 text: `Reklamacja od ${claim.name} (${claim.email})\nOpis: ${
                     claim.description
                 }\nReklamacja ma ${diffDays} dni i nie została odrzucona`,
