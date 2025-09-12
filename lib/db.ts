@@ -1,14 +1,14 @@
-// lib/db.ts
 import { sql } from "@vercel/postgres";
 
 export async function initDb() {
-    await sql`
+  await sql`
     CREATE TABLE IF NOT EXISTS claims (
       id SERIAL PRIMARY KEY,
       name TEXT,
       email TEXT,
       description TEXT,
-      createdAt TIMESTAMP DEFAULT NOW()
+      createdat TIMESTAMP DEFAULT NOW(),
+      due_date TIMESTAMP
     );
   `;
 }

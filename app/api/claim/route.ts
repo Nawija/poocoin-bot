@@ -7,13 +7,10 @@ export async function GET() {
     await initDb();
     const result = await sql`
     SELECT 
-      id, 
-      name, 
-      email, 
-      description, 
-      createdat::timestamptz AT TIME ZONE 'UTC' AS created_at
+      id, name, email, description, createdat::timestamptz AT TIME ZONE 'UTC' AS created_at,
+      due_date
     FROM claims
-    ORDER BY createdat DESC;
+    ORDER BY createdat DESC
   `;
     return NextResponse.json(result.rows);
 }
@@ -29,12 +26,15 @@ export async function POST(req: Request) {
         );
     }
 
+    // ustawiamy due_date 14 dni od teraz
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 14);
+
     await sql`
-    INSERT INTO claims (name, email, description)
-    VALUES (${name}, ${email}, ${description});
+    INSERT INTO claims (name, email, description, due_date)
+   VALUES (${name}, ${email}, ${description}, ${dueDate.toISOString()});
   `;
 
-    // transporter
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT),
@@ -45,12 +45,11 @@ export async function POST(req: Request) {
         },
     });
 
-    // mail do Ciebie
     await transporter.sendMail({
         from: `"System reklamacji" <${process.env.SMTP_USER}>`,
         to: "konradwiel@interia.pl",
         subject: "Nowa reklamacja",
-        text: `Nowa reklamacja od: ${name} (${email})\n\nOpis: ${description}`,
+        text: `Nowa reklamacja od: ${name} (${email})\n\nOpis: ${description}\nKończy się: ${dueDate.toLocaleDateString()}`,
     });
 
     return NextResponse.json({ ok: true });

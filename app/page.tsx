@@ -62,7 +62,7 @@ export default function HomePage() {
   }
 
   return (
-    <div>
+    <div className="max-w-2xl mx-auto p-6">
       <section className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4">Dodaj nową reklamację</h2>
 
@@ -100,7 +100,6 @@ export default function HomePage() {
             >
               {loading ? "Wysyłam..." : "Dodaj i wyślij potwierdzenie"}
             </button>
-
             <button
               type="button"
               onClick={() =>
@@ -130,9 +129,7 @@ export default function HomePage() {
                   {c.name}{" "}
                   <span className="text-sm text-slate-500">({c.email})</span>
                 </div>
-                <div className="text-sm text-slate-700 mt-1">
-                  {c.description}
-                </div>
+                <div className="text-sm text-slate-700 mt-1">{c.description}</div>
                 <div className="text-sm text-slate-400 mt-1">
                   {c.created_at
                     ? new Date(c.created_at).toLocaleString("pl-PL")

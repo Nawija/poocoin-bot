@@ -8,13 +8,10 @@ export async function DELETE(
 ) {
   try {
     await initDb();
-    const { id } = params;
-
-    await sql`DELETE FROM claims WHERE id = ${id}`;
-
+    await sql`DELETE FROM claims WHERE id = ${params.id}`;
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("❌ Delete error:", error);
-    return NextResponse.json({ success: false, error }, { status: 500 });
+    return NextResponse.json({ success: false }, { status: 500 });
   }
 }
