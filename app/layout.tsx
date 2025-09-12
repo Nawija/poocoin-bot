@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <body>
                 <header className="bg-white shadow-sm">
                     <div className=" py-4 px-4 max-w-7xl mx-auto flex items-center justify-between">
-                        <p></p>
+                        <p className="hidden md:flex"></p>
                         <Link href="/">
                             <div className="relative -mt-4">
                                 <h1 className="text-2xl text-sky-600 font-bold">

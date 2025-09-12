@@ -197,7 +197,7 @@ export default function HomePage() {
                             Lista reklamacji
                         </h3>
                         {claims.length > 0 && (
-                            <div className="p-1 bg-red-500 rounded-full ml-1 -mt-1">
+                            <div className="h-5 w-5 flex items-center justify-center bg-red-600 rounded-full ml-1">
                                 <p className="text-xs text-white font-bold">
                                     {claims.length}
                                 </p>
