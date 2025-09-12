@@ -7,7 +7,7 @@ export async function GET() {
   await initDb();
 
   const today = new Date();
-  const reminderDays = [10, 13];
+  const reminderDays = [0, 1];
 
   const claims = await sql`SELECT * FROM claims`;
 
