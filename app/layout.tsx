@@ -46,7 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     {children}
                 </main>
 
-                <footer className="mt-12 py-8 text-center text-sm text-slate-500">
+                <footer className="my-12 py-8 text-center text-sm text-slate-500">
                     © {new Date().getFullYear()} Konrad Wielgóski — prosty
                     system reklamacji
                 </footer>

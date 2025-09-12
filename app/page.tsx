@@ -245,7 +245,7 @@ export default function HomePage() {
                                                                   (1000 *
                                                                       60 *
                                                                       60 *
-                                                                      24)
+                                                                      24) 
                                                           );
 
                                                       let colorClass =

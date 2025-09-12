@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     // ustawiamy createdat (teraz) i due_date (za 14 dni)
     const createdAt = new Date();
     const dueDate = new Date(due_date); // 👈 bierzemy z inputa
-    dueDate.setDate(dueDate.getDate() + 14);
+    dueDate.setDate(dueDate.getDate() + 13);
 
     await sql`
     INSERT INTO claims (name, email, description, createdat, due_date)
