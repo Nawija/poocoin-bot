@@ -7,7 +7,7 @@ export async function GET() {
     await initDb();
 
     const today = new Date();
-    const reminderDays = [1, 2];
+    const reminderDays = [0, 1, 2, 3];
 
     const claims = await sql`SELECT * FROM claims`;
 
@@ -26,7 +26,7 @@ export async function GET() {
 
         const due = new Date(claim.due_date);
         const diffDays = Math.floor(
-            (due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+            (due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) +1
         );
 
         if (reminderDays.includes(diffDays)) {
@@ -34,9 +34,7 @@ export async function GET() {
                 from: `"System Reklamacji" <${process.env.EMAIL_USER}>`,
                 to: "reklamacje.siedlce@mebloo.pl",
                 subject: `Reklamacja klienta ${claim.name} zbliża się do końca`,
-                text: `Reklamacja od ${claim.name} (${claim.email})\nOpis: ${
-                    claim.description
-                }\nReklamacja kończy sie za ${diffDays} dni i nie została odrzucona`,
+                text: `Reklamacja od ${claim.name} (${claim.email})\nOpis: ${claim.description}\nReklamacja kończy sie za ${diffDays} dni i nie została odrzucona`,
             });
             sentCount++;
         }

@@ -20,7 +20,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </div>
             </Link>
             <nav className="space-x-4">
-              <Link className="text-slate-600 hover:text-slate-900" href="/">Strona główna</Link>
               <Link className="text-slate-600 hover:text-slate-900" href="/settings">Ustawienia </Link>
             </nav>
           </div>
