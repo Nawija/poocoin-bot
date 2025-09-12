@@ -7,7 +7,7 @@ export async function GET() {
     await initDb();
 
     const today = new Date();
-    const reminderDays = [10, 13];
+    const reminderDays = [1, 2];
 
     const claims = await sql`SELECT * FROM claims`;
 
@@ -36,7 +36,7 @@ export async function GET() {
                 subject: `Reklamacja klienta ${claim.name} zbliża się do końca`,
                 text: `Reklamacja od ${claim.name} (${claim.email})\nOpis: ${
                     claim.description
-                }\nReklamacja ma ${diffDays} dni i nie została odrzucona`,
+                }\nReklamacja kończy sie za ${diffDays} dni i nie została odrzucona`,
             });
             sentCount++;
         }

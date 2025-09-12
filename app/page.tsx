@@ -62,75 +62,12 @@ export default function HomePage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto p-6">
-            <section className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">
-                    Dodaj nową reklamację
-                </h2>
-
-                {msg && (
-                    <div className="mb-4 text-sm text-slate-700">{msg}</div>
-                )}
-
-                <form onSubmit={submit} className="grid gap-3">
-                    <input
-                        className="border rounded px-3 py-2"
-                        placeholder="Imię i nazwisko klienta"
-                        value={form.name}
-                        onChange={(e) =>
-                            setForm({ ...form, name: e.target.value })
-                        }
-                        required
-                    />
-                    <input
-                        className="border rounded px-3 py-2"
-                        placeholder="E-mail klienta"
-                        value={form.email}
-                        onChange={(e) =>
-                            setForm({ ...form, email: e.target.value })
-                        }
-                        type="email"
-                        required
-                    />
-                    <textarea
-                        className="border rounded px-3 py-2 min-h-[100px]"
-                        placeholder="Opis reklamacji"
-                        value={form.description}
-                        onChange={(e) =>
-                            setForm({ ...form, description: e.target.value })
-                        }
-                        required
-                    />
-
-                    <div className="flex items-center gap-3">
-                        <button
-                            className="bg-sky-600 text-white px-4 py-2 rounded hover:bg-sky-700 disabled:opacity-60"
-                            type="submit"
-                            disabled={loading}
-                        >
-                            {loading
-                                ? "Wysyłam..."
-                                : "Dodaj i wyślij potwierdzenie"}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setForm({
-                                    name: "",
-                                    email: "",
-                                    description: "",
-                                })
-                            }
-                            className="px-4 py-2 border rounded"
-                        >
-                            Wyczyść
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <section className="mt-8">
-                <h3 className="text-lg font-semibold mb-4">Lista reklamacji</h3>
+        <div className="mx-auto p-6 flex items-start justify-center max-w-7xl space-x-8">
+            <section className="w-full">
+                <div className="flex items-start justify-start mb-4">
+                    <h3 className="text-lg font-semibold">Lista reklamacji</h3>
+                    <p className="text-xs ml-1">({claims.length})</p>
+                </div>
                 <div className="space-y-4">
                     {claims.length === 0 && (
                         <div className="text-slate-500">Brak reklamacji.</div>
@@ -166,6 +103,80 @@ export default function HomePage() {
                             </button>
                         </div>
                     ))}
+                </div>
+            </section>
+            <section className="w-full ">
+                <div className="flex items-start justify-start mb-4">
+                    <h3 className="text-lg font-semibold">Lista reklamacji</h3>
+                    <p className="text-xs ml-1">({claims.length})</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow">
+                    <h2 className="text-xl font-semibold mb-4">
+                        Dodaj nową reklamację
+                    </h2>
+
+                    {msg && (
+                        <div className="mb-4 text-sm text-emerald-600">{msg}</div>
+                    )}
+
+                    <form onSubmit={submit} className="grid gap-3">
+                        <input
+                            className="border rounded px-3 py-2"
+                            placeholder="Imię i nazwisko klienta"
+                            value={form.name}
+                            onChange={(e) =>
+                                setForm({ ...form, name: e.target.value })
+                            }
+                            required
+                        />
+                        <input
+                            className="border rounded px-3 py-2"
+                            placeholder="E-mail klienta"
+                            value={form.email}
+                            onChange={(e) =>
+                                setForm({ ...form, email: e.target.value })
+                            }
+                            type="email"
+                            required
+                        />
+                        <textarea
+                            className="border rounded px-3 py-2 min-h-[100px]"
+                            placeholder="Opis reklamacji"
+                            value={form.description}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    description: e.target.value,
+                                })
+                            }
+                            required
+                        />
+
+                        <div className="flex items-center gap-3">
+                            <button
+                                className="bg-sky-600 text-white transition-colors px-4 py-2 rounded hover:bg-sky-700 cursor-pointer"
+                                type="submit"
+                                disabled={loading}
+                            >
+                                {loading
+                                    ? "Wysyłam..."
+                                    : "Dodaj i wyślij potwierdzenie"}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setForm({
+                                        name: "",
+                                        email: "",
+                                        description: "",
+                                    })
+                                }
+                                className="px-4 py-2 border rounded cursor-pointer"
+                            >
+                                Wyczyść
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </section>
         </div>

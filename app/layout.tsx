@@ -21,15 +21,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </Link>
             <nav className="space-x-4">
               <Link className="text-slate-600 hover:text-slate-900" href="/">Strona główna</Link>
-              <Link className="text-slate-600 hover:text-slate-900" href="/settings">Ustawienia SMTP</Link>
+              <Link className="text-slate-600 hover:text-slate-900" href="/settings">Ustawienia </Link>
             </nav>
           </div>
         </header>
 
-        <main className="container py-8">{children}</main>
+        <main>{children}</main>
 
         <footer className="mt-12 py-8 text-center text-sm text-slate-500">
-          © {new Date().getFullYear()} Twoja Firma — prosty system reklamacji
+          © {new Date().getFullYear()} Konrad Wielgóski — prosty system reklamacji
         </footer>
       </body>
     </html>
