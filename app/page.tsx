@@ -16,7 +16,7 @@ export default function HomePage() {
   const [msg, setMsg] = useState<string | null>(null);
 
   async function loadClaims() {
-    const res = await fetch("/api/claims");
+    const res = await fetch("/api/claim");
     if (res.ok) {
       const data = await res.json();
       setClaims(data);
@@ -47,6 +47,17 @@ export default function HomePage() {
     } else {
       const err = await res.json();
       setMsg("Błąd: " + (err?.error || "nieznany"));
+    }
+  }
+
+  async function deleteClaim(id: number) {
+    if (!confirm("Na pewno usunąć tę reklamację?")) return;
+    const res = await fetch(`/api/claim/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setMsg("Reklamacja została usunięta.");
+      loadClaims();
+    } else {
+      setMsg("Błąd przy usuwaniu reklamacji.");
     }
   }
 
@@ -92,7 +103,9 @@ export default function HomePage() {
 
             <button
               type="button"
-              onClick={() => { setForm({ name: "", email: "", description: "" }); }}
+              onClick={() =>
+                setForm({ name: "", email: "", description: "" })
+              }
               className="px-4 py-2 border rounded"
             >
               Wyczyść
@@ -104,14 +117,34 @@ export default function HomePage() {
       <section className="mt-8">
         <h3 className="text-lg font-semibold mb-4">Lista reklamacji</h3>
         <div className="space-y-4">
-          {claims.length === 0 && <div className="text-slate-500">Brak reklamacji.</div>}
+          {claims.length === 0 && (
+            <div className="text-slate-500">Brak reklamacji.</div>
+          )}
           {claims.map((c) => (
-            <div key={c.id} className="bg-white p-4 rounded shadow-sm flex justify-between">
+            <div
+              key={c.id}
+              className="bg-white p-4 rounded shadow-sm flex justify-between items-start"
+            >
               <div>
-                <div className="font-medium">{c.name} <span className="text-sm text-slate-500">({c.email})</span></div>
-                <div className="text-sm text-slate-700 mt-1">{c.description}</div>
+                <div className="font-medium">
+                  {c.name}{" "}
+                  <span className="text-sm text-slate-500">({c.email})</span>
+                </div>
+                <div className="text-sm text-slate-700 mt-1">
+                  {c.description}
+                </div>
+                <div className="text-sm text-slate-400 mt-1">
+                  {c.created_at
+                    ? new Date(c.created_at).toLocaleString("pl-PL")
+                    : "—"}
+                </div>
               </div>
-              <div className="text-sm text-slate-400">{new Date(c.created_at).toLocaleString()}</div>
+              <button
+                onClick={() => deleteClaim(c.id)}
+                className="ml-4 bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded"
+              >
+                Usuń
+              </button>
             </div>
           ))}
         </div>
