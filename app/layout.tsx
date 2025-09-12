@@ -14,7 +14,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <header className="bg-white shadow-sm">
           <div className="container py-4 flex items-center justify-between">
             <Link href="/">
-              <h1 className="text-2xl font-semibold text-sky-600">Reklamacje</h1>
+              <div className="relative -mt-4">
+                <h1 className="text-2xl text-sky-600 font-bold">REKLAMACJE</h1>
+                <p className="absolute right-0 -bottom-3 text-[11px]">by Konrad Wielgórski</p>
+              </div>
             </Link>
             <nav className="space-x-4">
               <Link className="text-slate-600 hover:text-slate-900" href="/">Strona główna</Link>
