@@ -2,6 +2,7 @@ import "./globals.css";
 import { ReactNode } from "react";
 import Link from "next/link";
 import { Mail, Settings } from "lucide-react";
+import LogoutButton from "./LogoutButton";
 
 export const metadata = {
     title: "Reklamacje",
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                             >
                                 <Settings />
                             </Link>
+                            <LogoutButton />
                         </nav>
                     </div>
                 </header>
