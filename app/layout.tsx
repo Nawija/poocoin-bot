@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     </div>
                 </header>
 
-                <main className="bg-gradient-to-t from-slate-50 to-blue-50">
+                <main className="bg-gradient-to-t from-slate-50 to-blue-50 min-h-[75vh]">
                     {children}
                 </main>
 
