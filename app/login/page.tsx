@@ -67,7 +67,7 @@ export default function LoginPage() {
                 />
                 <button
                     type="submit"
-                    className="bg-sky-600 text-white cursor-pointer px-4 py-2 w-full rounded hover:bg-sky-700 flex justify-center items-center"
+                    className="bg-sky-600 transition-colors text-white cursor-pointer px-4 py-2 w-full rounded hover:bg-sky-700 flex justify-center items-center"
                     disabled={loading}
                 >
                     {loading ? (

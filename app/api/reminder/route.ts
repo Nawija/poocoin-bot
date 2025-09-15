@@ -32,7 +32,7 @@ export async function GET() {
         if (reminderDays.includes(diffDays)) {
             await transporter.sendMail({
                 from: `"System Reklamacji" <${process.env.EMAIL_USER}>`,
-                to: "konradwiel@interia.pl",
+                to: "kwielgorski@mebloo.pl",
                 subject: `Reklamacja klienta ${claim.name} zbliża się do końca`,
                 text: `Reklamacja od ${claim.name} (${claim.email})\nOpis: ${claim.description}\nReklamacja kończy sie za ${diffDays} dni i nie została odrzucona`,
             });
