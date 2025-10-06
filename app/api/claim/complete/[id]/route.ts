@@ -3,16 +3,17 @@ import { sql } from "@vercel/postgres";
 import { initDb } from "@/lib/db";
 
 export async function POST(
-    _req: Request,
-    {
-        params,
-    }: {
-        params: Promise<{ id: string }>;
-    }
+    req: Request,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     await initDb();
     const awaitedParams = await Promise.resolve(params);
     const { id } = awaitedParams;
+
+    // Pobierz body z frontendu
+    const body = await req.json();
+    const completionOption: string | null = body.option ?? null;
+    const otherDescription: string | null = body.otherDescription ?? null;
 
     // Pobierz reklamację
     const { rows } = await sql`SELECT * FROM claims WHERE id = ${id}`;
@@ -24,13 +25,18 @@ export async function POST(
 
     const claim = rows[0];
     const completedAt = new Date();
+    const createdAt = claim.createdat ?? new Date().toISOString();
 
-    // Przenieś do historii
+    // Przenieś do historii wraz z opcjami
     await sql`
-    INSERT INTO claims_history (name, email, description, created_at, completed_at, due_date)
-    VALUES (${claim.name}, ${claim.email}, ${claim.description}, ${
-        claim.created_at
-    }, ${completedAt.toISOString()}, ${claim.due_date})
+    INSERT INTO claims_history
+      (name, email, description, created_at, completed_at, due_date, completion_option, other_description)
+    VALUES
+      (${claim.name}, ${claim.email}, ${
+        claim.description
+    }, ${createdAt}, ${completedAt.toISOString()}, ${
+        claim.due_date
+    }, ${completionOption}, ${otherDescription})
   `;
 
     // Usuń z aktualnych

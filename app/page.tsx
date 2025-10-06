@@ -13,6 +13,8 @@ type Claim = {
     created_at: string;
     completed_at?: string;
     due_date?: string;
+    completion_option?: CompleteOption | null;
+    other_description?: string | null;
 };
 
 type FormData = {
@@ -37,6 +39,9 @@ export default function HomePage() {
         description: "",
         due_date: "",
     });
+    const [openAccordions, setOpenAccordions] = useState<
+        Record<number, boolean>
+    >({});
     const [claims, setClaims] = useState<Claim[]>([]);
     const [history, setHistory] = useState<Claim[]>([]);
     const [loading, setLoading] = useState(false);
@@ -49,6 +54,14 @@ export default function HomePage() {
 
     const [loadingClaims, setLoadingClaims] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
+
+    // Toggle function:
+    const toggleAccordion = (id: number) => {
+        setOpenAccordions((prev) => ({
+            ...prev,
+            [id]: !prev[id],
+        }));
+    };
 
     // === Efekt: automatyczne ukrycie wiadomości po 2s ===
     useEffect(() => {
@@ -406,21 +419,19 @@ export default function HomePage() {
                                                             key="completion-card"
                                                             initial={{
                                                                 opacity: 0,
-                                                                y: 20,
                                                             }}
                                                             animate={{
                                                                 opacity: 1,
-                                                                y: 0,
                                                             }}
                                                             exit={{
                                                                 opacity: 0,
-                                                                y: 20,
+                                                                y: 500,
                                                             }}
                                                             transition={{
                                                                 duration: 0.25,
                                                                 ease: "easeInOut",
                                                             }}
-                                                            className="bg-white absolute left-0 top-0 shadow-xl rounded-xl p-5 w-full flex flex-col gap-4 border border-gray-200 transition-all"
+                                                            className="bg-white absolute left-0 z-50 top-0 shadow-xl rounded-xl p-5 w-full flex flex-col gap-4 border border-gray-200 transition-all"
                                                         >
                                                             <p className="text-gray-700 font-semibold text-sm">
                                                                 Wybierz wynik
@@ -651,7 +662,6 @@ export default function HomePage() {
                                 >
                                     {sendingMonth === month ? (
                                         <>
-                                            {/* Shimmer overlay */}
                                             <span className="absolute inset-0 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-500 opacity-50 animate-shimmer"></span>
                                             <div className="relative flex items-center gap-2">
                                                 <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
@@ -665,37 +675,153 @@ export default function HomePage() {
                                     )}
                                 </button>
                             </div>
+
                             <div className="bg-white rounded-xl divide-y divide-slate-200 shadow-sm">
                                 {items.map((h) => (
-                                    <div
-                                        key={h.id}
-                                        className="flex items-start justify-between px-4 py-3 even:bg-gray-50 hover:bg-sky-50 transition"
-                                    >
-                                        <span className="flex-1 text-slate-800">
-                                            {h.name}
-                                        </span>
-                                        <span className="flex-1 text-slate-500">
-                                            {h.email}
-                                        </span>
-                                        <span className="flex-2 text-slate-700">
-                                            {h.description}
-                                        </span>
-                                        <span className="flex-1 text-slate-500">
-                                            {new Date(
-                                                h.created_at
-                                            ).toLocaleDateString("pl-PL")}
-                                        </span>
-                                        <span className="flex-1 text-slate-500">
-                                            {new Date(
-                                                h.completed_at || ""
-                                            ).toLocaleDateString("pl-PL")}
-                                        </span>
-                                        <button
-                                            onClick={() => deleteHistory(h.id)}
-                                            className="ml-4 text-red-500 hover:text-red-600 transition cursor-pointer"
+                                    <div key={h.id}>
+                                        {/* Header */}
+                                        <div
+                                            className="grid grid-cols-[1fr_2fr_0.4fr_0.4fr_1fr_auto] items-center gap-2 px-4 py-3 cursor-pointer hover:bg-sky-50 transition"
+                                            onClick={() =>
+                                                toggleAccordion(h.id)
+                                            }
                                         >
-                                            <X size={18} />
-                                        </button>
+                                            <span className="truncate mr-4">
+                                                {h.name}
+                                            </span>
+                                            
+                                            <span className="truncate mr-4">
+                                                {h.description}
+                                            </span>
+                                            <span className="truncate">
+                                                {new Date(
+                                                    h.created_at
+                                                ).toLocaleDateString("pl-PL")}
+                                            </span>
+                                            <span className="truncate">
+                                                {h.completed_at
+                                                    ? new Date(
+                                                          h.completed_at
+                                                      ).toLocaleDateString(
+                                                          "pl-PL"
+                                                      )
+                                                    : "—"}
+                                            </span>
+                                            <span
+                                                className={`truncate font-medium ${
+                                                    h.completion_option ===
+                                                    "positive"
+                                                        ? "text-green-600"
+                                                        : h.completion_option ===
+                                                          "negative"
+                                                        ? "text-red-600"
+                                                        : h.completion_option ===
+                                                          "other"
+                                                        ? "text-yellow-600"
+                                                        : "text-slate-500"
+                                                }`}
+                                            >
+                                                {h.completion_option
+                                                    ? h.completion_option ===
+                                                      "other"
+                                                        ? h.other_description
+                                                        : h.completion_option ===
+                                                          "positive"
+                                                        ? "Pozytywnie"
+                                                        : "Negatywnie"
+                                                    : "—"}
+                                            </span>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteHistory(h.id);
+                                                }}
+                                                className="text-red-500 hover:text-red-600 transition cursor-pointer"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+
+                                        {/* Accordion content */}
+                                        <AnimatePresence initial={false}>
+                                            {openAccordions[h.id] && (
+                                                <motion.div
+                                                    layout
+                                                    initial={{
+                                                        height: 0,
+                                                        opacity: 0,
+                                                    }}
+                                                    animate={{
+                                                        height: "auto",
+                                                        opacity: 1,
+                                                    }}
+                                                    exit={{
+                                                        height: 0,
+                                                        opacity: 0,
+                                                    }}
+                                                    transition={{
+                                                        duration: 0.1,
+                                                        ease: "easeInOut",
+                                                    }}
+                                                    style={{
+                                                        overflow: "hidden",
+                                                    }}
+                                                    className="px-6 py-4 bg-gradient-to-tl from-stone-100 to-gray-50 text-base text-slate-600 border-y border-stone-300"
+                                                >
+                                                    <p>
+                                                        <strong>
+                                                            Imię i nazwisko:
+                                                        </strong>{" "}
+                                                        {h.name}
+                                                    </p>
+                                                    <p>
+                                                        <strong>Email:</strong>{" "}
+                                                        {h.email}
+                                                    </p>
+                                                    <p>
+                                                        <strong>
+                                                            Opis reklamacji:
+                                                        </strong>{" "}
+                                                        {h.description}
+                                                    </p>
+                                                    <p>
+                                                        <strong>
+                                                            Data zgłoszenia:
+                                                        </strong>{" "}
+                                                        {new Date(
+                                                            h.created_at
+                                                        ).toLocaleDateString(
+                                                            "pl-PL"
+                                                        )}
+                                                    </p>
+                                                    <p>
+                                                        <strong>
+                                                            Data zakończenia:
+                                                        </strong>{" "}
+                                                        {h.completed_at
+                                                            ? new Date(
+                                                                  h.completed_at
+                                                              ).toLocaleDateString(
+                                                                  "pl-PL"
+                                                              )
+                                                            : "—"}
+                                                    </p>
+                                                    <p>
+                                                        <strong>Wynik:</strong>{" "}
+                                                        {h.completion_option ===
+                                                        "other"
+                                                            ? h.other_description
+                                                            : h.completion_option ===
+                                                              "positive"
+                                                            ? "Pozytywnie"
+                                                            : h.completion_option ===
+                                                              "negative"
+                                                            ? "Negatywnie"
+                                                            : "—"}
+                                                    </p>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 ))}
                             </div>

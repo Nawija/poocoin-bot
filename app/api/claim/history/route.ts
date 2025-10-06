@@ -5,7 +5,8 @@ import { initDb } from "@/lib/db";
 export async function GET() {
     await initDb();
     const result = await sql`
-    SELECT id, name, email, description, created_at, completed_at, due_date
+    SELECT id, name, email, description, created_at, completed_at, due_date,
+           completion_option, other_description
     FROM claims_history
     ORDER BY completed_at DESC
   `;
