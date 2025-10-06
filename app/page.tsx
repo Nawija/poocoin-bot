@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { Clock4, Trash2, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,8 +43,34 @@ export default function HomePage() {
         setLoadingClaims(false);
     }
 
+    const [history, setHistory] = useState<Claim[]>([]);
+
+    async function loadHistory() {
+        const res = await fetch("/api/claim/history");
+        if (res.ok) {
+            const data = await res.json();
+            setHistory(data);
+        }
+    }
+
+    async function completeClaim(id: number) {
+        if (!confirm("Na pewno oznaczyć tę reklamację jako zrealizowaną?"))
+            return;
+        const res = await fetch(`/api/claim/complete/${id}`, {
+            method: "POST",
+        });
+        if (res.ok) {
+            setMsg("Reklamacja została zrealizowana.");
+            await loadClaims();
+            await loadHistory();
+        } else {
+            setMsg("Błąd przy realizacji reklamacji.");
+        }
+    }
+
     useEffect(() => {
         loadClaims();
+        loadHistory();
     }, []);
 
     async function submit(e: React.FormEvent) {
@@ -77,6 +104,19 @@ export default function HomePage() {
             loadClaims();
         } else {
             setMsg("Błąd przy usuwaniu reklamacji.");
+        }
+    }
+
+    async function deleteHistory(id: number) {
+        if (!confirm("Na pewno usunąć tę historię reklamacji?")) return;
+        const res = await fetch(`/api/claim/history/${id}`, {
+            method: "DELETE",
+        });
+        if (res.ok) {
+            setMsg("Historia reklamacji została usunięta.");
+            await loadHistory();
+        } else {
+            setMsg("Błąd przy usuwaniu historii.");
         }
     }
 
@@ -312,17 +352,155 @@ export default function HomePage() {
                                                 : "—"}
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => deleteClaim(c.id)}
-                                        className="ml-4 bg-red-500 hover:bg-red-600 transition-colors cursor-pointer text-white text-xs font-bold p-2 rounded"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                    <div className="flex gap-2 ml-4">
+                                        <button
+                                            onClick={() => completeClaim(c.id)}
+                                            className="bg-green-600 hover:bg-green-700 transition-colors cursor-pointer text-white text-xs font-bold p-2 rounded"
+                                        >
+                                            Zrealizuj
+                                        </button>
+                                        <button
+                                            onClick={() => deleteClaim(c.id)}
+                                            className="ml-4 bg-red-500 hover:bg-red-600 transition-colors cursor-pointer text-white text-xs font-bold p-2 rounded"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                     </div>
                 </section>
             </div>
+            <section className="w-full mt-10 p-6 max-w-7xl mx-auto">
+                <h3 className="text-xl font-semibold mb-4">
+                    Historia reklamacji
+                </h3>
+                {history.length === 0 ? (
+                    <p className="text-slate-500">
+                        Brak zrealizowanych reklamacji
+                    </p>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full bg-white rounded shadow-sm border border-slate-200">
+                            <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th className="text-left px-4 py-2 font-medium text-slate-700">
+                                        Klient
+                                    </th>
+                                    <th className="text-left px-4 py-2 font-medium text-slate-700">
+                                        E-mail
+                                    </th>
+                                    <th className="text-left px-4 py-2 font-medium text-slate-700">
+                                        Opis reklamacji
+                                    </th>
+                                    <th className="text-left px-4 py-2 font-medium text-slate-700">
+                                        Dodano
+                                    </th>
+                                    <th className="text-left px-4 py-2 font-medium text-slate-700">
+                                        Zrealizowano
+                                    </th>
+                                    <th className="px-4 py-2 font-medium text-slate-700">
+                                        Akcje
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {Object.entries(
+                                    history
+                                        .sort(
+                                            (a, b) =>
+                                                new Date(
+                                                    b.completed_at
+                                                ).getTime() -
+                                                new Date(
+                                                    a.completed_at
+                                                ).getTime()
+                                        )
+                                        .reduce<Record<string, Claim[]>>(
+                                            (acc, h) => {
+                                                const date = new Date(
+                                                    h.completed_at
+                                                );
+                                                const month =
+                                                    date.toLocaleString(
+                                                        "pl-PL",
+                                                        {
+                                                            month: "long",
+                                                            year: "numeric",
+                                                        }
+                                                    );
+                                                if (!acc[month])
+                                                    acc[month] = [];
+                                                acc[month].push(h);
+                                                return acc;
+                                            },
+                                            {}
+                                        )
+                                ).map(([month, items]) => (
+                                    <React.Fragment key={month}>
+                                        <tr className="w-full bg-slate-100  font-semibold text-slate-700">
+                                            <td
+                                                colSpan={6}
+                                                className="px-4 py-2"
+                                            >
+                                                <p className="relative w-max">
+                                                    {month
+                                                        .charAt(0)
+                                                        .toUpperCase() +
+                                                        month.slice(1)}
+                                                    <span className="ml-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full absolute -right-6 -top-1.5">
+                                                        {items.length}
+                                                    </span>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        {items.map((h) => (
+                                            <tr
+                                                key={h.id}
+                                                className="border-b border-slate-200 hover:bg-slate-50 transition-colors"
+                                            >
+                                                <td className="px-4 py-2">
+                                                    {h.name}
+                                                </td>
+                                                <td className="px-4 py-2 text-slate-500">
+                                                    {h.email}
+                                                </td>
+                                                <td className="px-4 py-2 text-slate-700">
+                                                    {h.description}
+                                                </td>
+                                                <td className="px-4 py-2 text-slate-500">
+                                                    {new Date(
+                                                        h.created_at
+                                                    ).toLocaleDateString(
+                                                        "pl-PL"
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-2 text-slate-500">
+                                                    {new Date(
+                                                        h.completed_at
+                                                    ).toLocaleDateString(
+                                                        "pl-PL"
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-2 text-center">
+                                                    <button
+                                                        onClick={() =>
+                                                            deleteHistory(h.id)
+                                                        }
+                                                        className="bg-red-500 hover:bg-red-600 transition-colors cursor-pointer text-white text-xs font-bold p-2 rounded"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </React.Fragment>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </section>
         </>
     );
 }
