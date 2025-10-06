@@ -3,11 +3,16 @@ import { sql } from "@vercel/postgres";
 import { initDb } from "@/lib/db";
 
 export async function POST(
-    req: Request,
-    { params }: { params: { id: string } }
+    _req: Request,
+    {
+        params,
+    }: {
+        params: Promise<{ id: string }>;
+    }
 ) {
     await initDb();
-    const id = params.id;
+    const awaitedParams = await Promise.resolve(params);
+    const { id } = awaitedParams;
 
     // Pobierz reklamację
     const { rows } = await sql`SELECT * FROM claims WHERE id = ${id}`;
