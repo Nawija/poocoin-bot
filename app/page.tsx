@@ -33,6 +33,8 @@ export default function HomePage() {
     const [claims, setClaims] = useState<Claim[]>([]);
     const [history, setHistory] = useState<Claim[]>([]);
     const [loading, setLoading] = useState(false);
+    const [sendingMonth, setSendingMonth] = useState<string | null>(null);
+
     const [loadingClaims, setLoadingClaims] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
 
@@ -121,6 +123,33 @@ export default function HomePage() {
         } else setMsg("❌ Błąd przy usuwaniu historii.");
     }
 
+    async function sendMonthEmail(month: string) {
+        setMsg(null);
+        setSendingMonth(month); // 🔹 zaznaczamy, że trwa wysyłanie maila
+
+        try {
+            const res = await fetch("/api/claim/send-month-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ month }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.ok) {
+                setMsg(
+                    `✅ Wysłano ${data.sent} reklamacji z miesiąca ${month}.`
+                );
+            } else {
+                setMsg(`❌ ${data.message || "Błąd przy wysyłaniu e-maila."}`);
+            }
+        } catch (err) {
+            setMsg("❌ Wystąpił błąd połączenia.");
+        } finally {
+            setSendingMonth(null); // 🔹 koniec wysyłki
+        }
+    }
+
     // === Pomocnicze ===
     function getDaysLeft(dueDate: string): { text: string; color: string } {
         const daysLeft = Math.ceil(
@@ -174,7 +203,7 @@ export default function HomePage() {
             <div className="mx-auto p-6 max-w-7xl flex flex-col md:flex-row gap-8 transition-all">
                 {/* === FORMULARZ === */}
                 <section className="w-full md:w-1/2">
-                    <h2 className="text-xl font-semibold mb-4">
+                    <h2 className="text-2xl font-semibold mb-6 text-slate-800">
                         Dodaj reklamację
                     </h2>
                     <div className="bg-white p-6 rounded-lg shadow">
@@ -275,12 +304,12 @@ export default function HomePage() {
 
                 {/* === LISTA REKLAMACJI === */}
                 <section className="w-full md:w-1/2">
-                    <div className="flex items-center mb-4">
-                        <h3 className="text-xl font-semibold">
+                    <div className="flex items-center">
+                        <h3 className="text-2xl font-semibold mb-6 text-slate-800">
                             Lista reklamacji
                         </h3>
                         {claims.length > 0 && (
-                            <span className="ml-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                            <span className="ml-2 -mt-10 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                                 {claims.length}
                             </span>
                         )}
@@ -355,7 +384,7 @@ export default function HomePage() {
             </div>
 
             {/* === HISTORIA === */}
-            <section className="w-full mt-10 p-6 max-w-7xl mx-auto">
+            <section className="w-full p-6 max-w-7xl mx-auto">
                 <h3 className="text-2xl font-semibold mb-6 text-slate-800">
                     Historia reklamacji
                 </h3>
@@ -385,13 +414,36 @@ export default function HomePage() {
                             }, {})
                     ).map(([month, items]) => (
                         <div key={month} className="mb-6">
-                            <div className="flex items-center mb-2">
-                                <h4 className="text-lg font-semibold text-slate-700 capitalize">
-                                    {month}
-                                </h4>
-                                <span className="ml-2 text-gray-600">
-                                    ({items.length})
-                                </span>
+                            <div className="flex items-center mb-4 justify-between">
+                                <div className="flex items-center">
+                                    <h4 className="text-lg font-semibold text-slate-700 capitalize">
+                                        {month}
+                                    </h4>
+                                    <span className="ml-2 -mt-2 text-gray-600">
+                                        ({items.length})
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={() => sendMonthEmail(month)}
+                                    disabled={sendingMonth === month}
+                                    className="relative overflow-hidden flex items-center justify-center gap-2 bg-sky-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow transition cursor-pointer hover:bg-sky-700"
+                                >
+                                    {sendingMonth === month ? (
+                                        <>
+                                            {/* Shimmer overlay */}
+                                            <span className="absolute inset-0 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-500 opacity-50 animate-shimmer"></span>
+                                            <div className="relative flex items-center gap-2">
+                                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                <span>Wysyłanie...</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            ✉️ <span>Prześlij na maila</span>
+                                        </>
+                                    )}
+                                </button>
                             </div>
                             <div className="bg-white rounded-xl divide-y divide-slate-200 shadow-sm">
                                 {items.map((h) => (
