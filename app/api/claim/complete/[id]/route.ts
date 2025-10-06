@@ -29,7 +29,7 @@ export async function POST(
     await sql`
     INSERT INTO claims_history (name, email, description, created_at, completed_at, due_date)
     VALUES (${claim.name}, ${claim.email}, ${claim.description}, ${
-        claim.createdat
+        claim.created_at
     }, ${completedAt.toISOString()}, ${claim.due_date})
   `;
 

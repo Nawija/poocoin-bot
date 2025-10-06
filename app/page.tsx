@@ -22,6 +22,13 @@ type FormData = {
     due_date: string;
 };
 
+type CompleteOption = "positive" | "negative" | "other";
+
+type ClaimWithCompletion = Claim & {
+    completionOption?: CompleteOption;
+    otherDescription?: string;
+};
+
 // === Komponent główny ===
 export default function HomePage() {
     const [form, setForm] = useState<FormData>({
@@ -35,6 +42,11 @@ export default function HomePage() {
     const [loading, setLoading] = useState(false);
     const [sendingMonth, setSendingMonth] = useState<string | null>(null);
 
+    const [expandedClaimId, setExpandedClaimId] = useState<number | null>(null);
+    const [completionOption, setCompletionOption] =
+        useState<CompleteOption | null>(null);
+    const [otherDescription, setOtherDescription] = useState<string>("");
+
     const [loadingClaims, setLoadingClaims] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
 
@@ -44,6 +56,31 @@ export default function HomePage() {
         const timer = setTimeout(() => setMsg(null), 2000);
         return () => clearTimeout(timer);
     }, [msg]);
+
+    // === Funkcja do zapisu realizacji z opcjami ===
+    async function completeClaimWithOption(claim: ClaimWithCompletion) {
+        if (!completionOption) return alert("Wybierz opcję realizacji");
+
+        const payload = {
+            option: completionOption,
+            otherDescription:
+                completionOption === "other" ? otherDescription : null,
+        };
+
+        const res = await fetch(`/api/claim/complete/${claim.id}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+            setMsg("✅ Reklamacja została zrealizowana.");
+            setExpandedClaimId(null);
+            setCompletionOption(null);
+            setOtherDescription("");
+            await refreshData();
+        } else setMsg("❌ Błąd przy realizacji reklamacji.");
+    }
 
     // === Pobieranie danych ===
     async function loadClaims() {
@@ -206,7 +243,7 @@ export default function HomePage() {
                     <h2 className="text-2xl font-semibold mb-6 text-slate-800">
                         Dodaj reklamację
                     </h2>
-                    <div className="bg-white p-6 rounded-lg shadow">
+                    <div className="bg-white p-6 rounded shadow">
                         <form onSubmit={handleSubmit} className="grid gap-3">
                             <input
                                 className="border border-zinc-300 rounded px-3 py-2"
@@ -276,7 +313,7 @@ export default function HomePage() {
                                 >
                                     {loading ? (
                                         <div className="flex items-center gap-2">
-                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin"></div>
                                             <span>Wysyłam...</span>
                                         </div>
                                     ) : (
@@ -317,7 +354,7 @@ export default function HomePage() {
 
                     {loadingClaims ? (
                         <div className="flex justify-center py-6">
-                            <div className="w-6 h-6 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-6 h-6 border border-sky-600 border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     ) : claims.length === 0 ? (
                         <p className="text-slate-500">Brak reklamacji</p>
@@ -331,7 +368,7 @@ export default function HomePage() {
                                 return (
                                     <div
                                         key={c.id}
-                                        className="bg-white p-4 rounded shadow-sm flex justify-between items-start hover:shadow-md transition"
+                                        className="bg-white relative p-4 rounded shadow-sm flex justify-between items-start hover:shadow-md transition"
                                     >
                                         <div className="flex-1">
                                             <div className="font-medium">
@@ -357,15 +394,198 @@ export default function HomePage() {
                                                 </span>
                                             </p>
                                         </div>
-                                        <div className="flex gap-2 ml-4">
-                                            <button
-                                                onClick={() =>
-                                                    completeClaim(c.id)
-                                                }
-                                                className="bg-green-600 hover:bg-green-700 cursor-pointer text-white p-2 rounded transition"
-                                            >
-                                                <Check size={16} />
-                                            </button>
+                                        <div className="flex gap-2 items-start">
+                                            {/* Przycisk rozwijania panelu */}
+                                            <motion.div layout>
+                                                <AnimatePresence
+                                                    initial={false}
+                                                >
+                                                    {expandedClaimId ===
+                                                    c.id ? (
+                                                        <motion.div
+                                                            key="completion-card"
+                                                            initial={{
+                                                                opacity: 0,
+                                                                y: 20,
+                                                            }}
+                                                            animate={{
+                                                                opacity: 1,
+                                                                y: 0,
+                                                            }}
+                                                            exit={{
+                                                                opacity: 0,
+                                                                y: 20,
+                                                            }}
+                                                            transition={{
+                                                                duration: 0.25,
+                                                                ease: "easeInOut",
+                                                            }}
+                                                            className="bg-white absolute left-0 top-0 shadow-xl rounded-xl p-5 w-full flex flex-col gap-4 border border-gray-200 transition-all"
+                                                        >
+                                                            <p className="text-gray-700 font-semibold text-sm">
+                                                                Wybierz wynik
+                                                                reklamacji:
+                                                            </p>
+
+                                                            <div className="flex flex-col gap-2">
+                                                                {[
+                                                                    "positive",
+                                                                    "negative",
+                                                                    "other",
+                                                                ].map(
+                                                                    (
+                                                                        option
+                                                                    ) => {
+                                                                        const labels =
+                                                                            {
+                                                                                positive:
+                                                                                    "Pozytywnie",
+                                                                                negative:
+                                                                                    "Negatywnie",
+                                                                                other: "Inne",
+                                                                            };
+                                                                        const colors =
+                                                                            {
+                                                                                positive:
+                                                                                    "bg-green-50 border-green-500",
+                                                                                negative:
+                                                                                    "bg-red-50 border-red-500",
+                                                                                other: "bg-yellow-50 border-yellow-500",
+                                                                            };
+
+                                                                        return (
+                                                                            <motion.label
+                                                                                key={
+                                                                                    option
+                                                                                }
+                                                                                className={`flex flex-col cursor-pointer rounded border p-2 transition-all ${
+                                                                                    completionOption ===
+                                                                                    option
+                                                                                        ? colors[
+                                                                                              option
+                                                                                          ] +
+                                                                                          " border"
+                                                                                        : "border-gray-200"
+                                                                                }`}
+                                                                            >
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <input
+                                                                                        type="radio"
+                                                                                        name={`completion-${c.id}`}
+                                                                                        value={
+                                                                                            option
+                                                                                        }
+                                                                                        checked={
+                                                                                            completionOption ===
+                                                                                            option
+                                                                                        }
+                                                                                        onChange={() =>
+                                                                                            setCompletionOption(
+                                                                                                option as CompleteOption
+                                                                                            )
+                                                                                        }
+                                                                                    />
+                                                                                    {
+                                                                                        labels[
+                                                                                            option as keyof typeof labels
+                                                                                        ]
+                                                                                    }
+                                                                                </div>
+
+                                                                                {/* Animowane pole dla opcji "Inne" */}
+                                                                                {option ===
+                                                                                    "other" &&
+                                                                                    completionOption ===
+                                                                                        "other" && (
+                                                                                        <motion.textarea
+                                                                                            key="other-input"
+                                                                                            placeholder="Opisz, co się wydarzyło"
+                                                                                            value={
+                                                                                                otherDescription
+                                                                                            }
+                                                                                            onChange={(
+                                                                                                e
+                                                                                            ) =>
+                                                                                                setOtherDescription(
+                                                                                                    e
+                                                                                                        .target
+                                                                                                        .value
+                                                                                                )
+                                                                                            }
+                                                                                            initial={{
+                                                                                                opacity: 0,
+                                                                                                y: -5,
+                                                                                            }}
+                                                                                            animate={{
+                                                                                                opacity: 1,
+                                                                                                y: 0,
+                                                                                            }}
+                                                                                            exit={{
+                                                                                                opacity: 0,
+                                                                                                y: -5,
+                                                                                            }}
+                                                                                            transition={{
+                                                                                                duration: 0.2,
+                                                                                            }}
+                                                                                            className="mt-2 border bg-white/80 border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-yellow-400"
+                                                                                        />
+                                                                                    )}
+                                                                            </motion.label>
+                                                                        );
+                                                                    }
+                                                                )}
+                                                            </div>
+
+                                                            {/* Przycisk zatwierdzenia */}
+                                                            <div className="flex gap-2 justify-end mt-2">
+                                                                <motion.button
+                                                                    whileHover={{
+                                                                        scale: 1.05,
+                                                                    }}
+                                                                    onClick={() =>
+                                                                        completeClaimWithOption(
+                                                                            c
+                                                                        )
+                                                                    }
+                                                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                                                                >
+                                                                    Zatwierdź
+                                                                </motion.button>
+                                                                <motion.button
+                                                                    whileHover={{
+                                                                        scale: 1.05,
+                                                                    }}
+                                                                    onClick={() =>
+                                                                        setExpandedClaimId(
+                                                                            null
+                                                                        )
+                                                                    }
+                                                                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition"
+                                                                >
+                                                                    Anuluj
+                                                                </motion.button>
+                                                            </div>
+                                                        </motion.div>
+                                                    ) : (
+                                                        <motion.button
+                                                            key="expand-btn"
+                                                            whileHover={{
+                                                                scale: 1.05,
+                                                            }}
+                                                            onClick={() =>
+                                                                setExpandedClaimId(
+                                                                    c.id
+                                                                )
+                                                            }
+                                                            className="bg-green-600 hover:bg-green-700 cursor-pointer text-white p-2 rounded transition"
+                                                        >
+                                                            <Check size={16} />
+                                                        </motion.button>
+                                                    )}
+                                                </AnimatePresence>
+                                            </motion.div>
+
+                                            {/* Przycisk usuwania */}
                                             <button
                                                 onClick={() =>
                                                     deleteClaim(c.id)
@@ -427,14 +647,14 @@ export default function HomePage() {
                                 <button
                                     onClick={() => sendMonthEmail(month)}
                                     disabled={sendingMonth === month}
-                                    className="relative overflow-hidden flex items-center justify-center gap-2 bg-sky-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow transition cursor-pointer hover:bg-sky-700"
+                                    className="relative overflow-hidden flex items-center justify-center gap-2 bg-sky-600 text-white text-sm font-medium px-4 py-2 rounded shadow transition cursor-pointer hover:bg-sky-700"
                                 >
                                     {sendingMonth === month ? (
                                         <>
                                             {/* Shimmer overlay */}
                                             <span className="absolute inset-0 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-500 opacity-50 animate-shimmer"></span>
                                             <div className="relative flex items-center gap-2">
-                                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
                                                 <span>Wysyłanie...</span>
                                             </div>
                                         </>
