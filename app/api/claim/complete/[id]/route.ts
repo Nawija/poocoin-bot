@@ -25,7 +25,7 @@ export async function POST(
 
     const claim = rows[0];
     const completedAt = new Date();
-    const createdAt = claim.createdat ?? new Date().toISOString();
+    const createdAt = claim.created_at || body.created_at || new Date().toISOString();
 
     // Przenieś do historii wraz z opcjami
     await sql`
