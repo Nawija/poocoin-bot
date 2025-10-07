@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Clock4, Trash2, X } from "lucide-react";
+import { Check, Clock4, Send, Trash2, X } from "lucide-react";
 
 // === Typy ===
 type Claim = {
@@ -549,40 +549,31 @@ export default function HomePage() {
 
                                                             {/* Przycisk zatwierdzenia */}
                                                             <div className="flex gap-2 justify-end mt-2">
-                                                                <motion.button
-                                                                    whileHover={{
-                                                                        scale: 1.05,
-                                                                    }}
+                                                                <button
                                                                     onClick={() =>
                                                                         completeClaimWithOption(
                                                                             c
                                                                         )
                                                                     }
-                                                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                                                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition cursor-pointer"
                                                                 >
                                                                     Zatwierdź
-                                                                </motion.button>
-                                                                <motion.button
-                                                                    whileHover={{
-                                                                        scale: 1.05,
-                                                                    }}
+                                                                </button>
+                                                                <button
                                                                     onClick={() =>
                                                                         setExpandedClaimId(
                                                                             null
                                                                         )
                                                                     }
-                                                                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition"
+                                                                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition cursor-pointer"
                                                                 >
                                                                     Anuluj
-                                                                </motion.button>
+                                                                </button>
                                                             </div>
                                                         </motion.div>
                                                     ) : (
-                                                        <motion.button
+                                                        <button
                                                             key="expand-btn"
-                                                            whileHover={{
-                                                                scale: 1.05,
-                                                            }}
                                                             onClick={() =>
                                                                 setExpandedClaimId(
                                                                     c.id
@@ -591,7 +582,7 @@ export default function HomePage() {
                                                             className="bg-green-600 hover:bg-green-700 cursor-pointer text-white p-2 rounded transition"
                                                         >
                                                             <Check size={16} />
-                                                        </motion.button>
+                                                        </button>
                                                     )}
                                                 </AnimatePresence>
                                             </motion.div>
@@ -653,7 +644,7 @@ export default function HomePage() {
                                     <h4 className="text-lg font-semibold text-slate-700 capitalize">
                                         {month}
                                     </h4>
-                                    <span className="ml-2 -mt-2 text-gray-600">
+                                    <span className="ml-2 -mt-2 text-sky-600">
                                         ({items.length})
                                     </span>
                                 </div>
@@ -668,12 +659,12 @@ export default function HomePage() {
                                             <span className="absolute inset-0 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-500 opacity-50 animate-shimmer"></span>
                                             <div className="relative flex items-center gap-2">
                                                 <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
-                                                <span>Wysyłanie...</span>
+                                                <span className="hidden md:block">Wysyłanie...</span>
                                             </div>
                                         </>
                                     ) : (
                                         <>
-                                            ✉️ <span>Prześlij na maila</span>
+                                            <Send size={16} /> <span className="hidden md:block">Prześlij na maila</span>
                                         </>
                                     )}
                                 </button>
@@ -684,7 +675,7 @@ export default function HomePage() {
                                     <div key={h.id}>
                                         {/* Header */}
                                         <div
-                                            className="grid grid-cols-[1fr_2fr_0.4fr_0.4fr_1fr_auto] items-center gap-2 px-4 py-3 cursor-pointer hover:bg-sky-50 transition"
+                                            className="grid grid-cols-[1fr_1fr_auto] md:grid-cols-[1fr_2fr_0.4fr_0.4fr_1fr_auto] items-center gap-2 px-4 py-3 cursor-pointer hover:bg-sky-50 transition"
                                             onClick={() =>
                                                 toggleAccordion(h.id)
                                             }
@@ -693,15 +684,15 @@ export default function HomePage() {
                                                 {h.name}
                                             </span>
 
-                                            <span className="truncate mr-4">
+                                            <span className="truncate mr-4 hidden md:block">
                                                 {h.description}
                                             </span>
-                                            <span className="truncate">
+                                            <span className="truncate hidden md:block">
                                                 {new Date(
                                                     h.created_at
                                                 ).toLocaleDateString("pl-PL")}
                                             </span>
-                                            <span className="truncate">
+                                            <span className="truncate hidden md:block">
                                                 {h.completed_at
                                                     ? new Date(
                                                           h.completed_at
