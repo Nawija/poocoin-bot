@@ -78,7 +78,7 @@ export async function POST(req: Request) {
 
         await transporter.sendMail({
             from: `"System Reklamacji" <${process.env.EMAIL_USER}>`,
-            to: "konradwiel@interia.pl",
+            to: "kwielgorski@mebloo.pl",
             subject: `Zestawienie reklamacji - ${month}`,
             html: `
         <div style="font-family:Arial,sans-serif; line-height:1.5; color:#333;">
