@@ -25,7 +25,9 @@ export async function POST(
 
     const claim = rows[0];
     const completedAt = new Date();
-    const createdAt = claim.created_at || body.created_at || new Date().toISOString();
+    const createdAt = new Date(claim.due_date);
+    createdAt.setDate(createdAt.getDate() - 12);
+    const formattedDate = createdAt.toISOString();
 
     // Przenieś do historii wraz z opcjami
     await sql`
@@ -34,7 +36,7 @@ export async function POST(
     VALUES
       (${claim.name}, ${claim.email}, ${
         claim.description
-    }, ${createdAt}, ${completedAt.toISOString()}, ${
+    }, ${formattedDate}, ${completedAt.toISOString()}, ${
         claim.due_date
     }, ${completionOption}, ${otherDescription})
   `;

@@ -628,17 +628,20 @@ export default function HomePage() {
                     Object.entries(
                         history
                             .sort(
-                                (a, b) =>
+                                (b, a) =>
                                     new Date(b.completed_at || "").getTime() -
                                     new Date(a.completed_at || "").getTime()
                             )
                             .reduce<Record<string, Claim[]>>((acc, h) => {
-                                const month = new Date(
-                                    h.completed_at || ""
-                                ).toLocaleString("pl-PL", {
+                                // ✅ Tworzymy datę na podstawie due_date i odejmujemy 13 dni
+                                const date = new Date(h.due_date || "");
+                                date.setDate(date.getDate() - 13);
+
+                                const month = date.toLocaleString("pl-PL", {
                                     month: "long",
                                     year: "numeric",
                                 });
+
                                 acc[month] = acc[month] || [];
                                 acc[month].push(h);
                                 return acc;
@@ -689,7 +692,7 @@ export default function HomePage() {
                                             <span className="truncate mr-4">
                                                 {h.name}
                                             </span>
-                                            
+
                                             <span className="truncate mr-4">
                                                 {h.description}
                                             </span>

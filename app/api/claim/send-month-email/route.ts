@@ -20,16 +20,19 @@ export async function POST(req: Request) {
             await sql`SELECT * FROM claims_history WHERE completed_at IS NOT NULL`;
         const claims = result.rows;
 
-        // Filtrujemy po miesiącu
+        // Filtrujemy po miesiącu z due_date - 13 dni
         const filtered = claims.filter((c) => {
-            const completedMonth = new Date(c.completed_at).toLocaleString(
-                "pl-PL",
-                {
-                    month: "long",
-                    year: "numeric",
-                }
-            );
-            return completedMonth.toLowerCase() === month.toLowerCase();
+            if (!c.due_date) return false;
+
+            const date = new Date(c.due_date);
+            date.setDate(date.getDate() - 13); // odejmujemy 13 dni
+
+            const dueMonth = date.toLocaleString("pl-PL", {
+                month: "long",
+                year: "numeric",
+            });
+
+            return dueMonth.toLowerCase() === month.toLowerCase();
         });
 
         if (filtered.length === 0) {
@@ -60,15 +63,19 @@ export async function POST(req: Request) {
                         ? "Negatywnie"
                         : "—";
 
+                const adjustedDueDate = new Date(c.due_date);
+                adjustedDueDate.setDate(adjustedDueDate.getDate() - 13);
+
                 return `
-          <div style="margin-bottom:20px; padding:10px; border-bottom:1px solid #ccc;">
+          <div style="margin-bottom:20px; padding:6px; border-bottom:1px solid #ccc;">
             <p><strong>#${i + 1} Klient:</strong> ${c.name} (${c.email})</p>
             <p><strong>Opis reklamacji:</strong> ${c.description}</p>
-            <p><strong>Data zgłoszenia:</strong> ${new Date(
-                c.created_at
-            ).toLocaleDateString("pl-PL")}</p>
+            
+            <p><strong>Data zgłoszenia:</strong> ${adjustedDueDate.toLocaleDateString(
+                "pl-PL"
+            )}</p>
             <p><strong>Data zakończenia:</strong> ${new Date(
-                c.completed_at
+                c.created_at
             ).toLocaleDateString("pl-PL")}</p>
             <p><strong>Wynik:</strong> ${resultText}</p>
           </div>
@@ -89,11 +96,12 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json({ ok: true, sent: filtered.length });
-    } catch {
-        console.error("Błąd przy wysyłaniu maila:");
+    } catch (err) {
+        console.error("Błąd przy wysyłaniu maila:", err);
         return NextResponse.json({
             ok: false,
             message: "Wystąpił błąd podczas wysyłania maila.",
+            error: err instanceof Error ? err.message : String(err),
         });
     }
 }
