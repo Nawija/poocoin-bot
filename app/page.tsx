@@ -450,9 +450,9 @@ export default function HomePage() {
                                                                         const labels =
                                                                             {
                                                                                 positive:
-                                                                                    "Pozytywnie",
+                                                                                    "Uznana przez producenta",
                                                                                 negative:
-                                                                                    "Negatywnie",
+                                                                                    "Odrzucona",
                                                                                 other: "Inne",
                                                                             };
                                                                         const colors =
@@ -721,8 +721,8 @@ export default function HomePage() {
                                                         ? h.other_description
                                                         : h.completion_option ===
                                                           "positive"
-                                                        ? "Pozytywnie"
-                                                        : "Negatywnie"
+                                                        ? "Uznana przez producenta"
+                                                        : "Odrzucona"
                                                     : "—"}
                                             </span>
                                             <button
@@ -807,10 +807,10 @@ export default function HomePage() {
                                                             ? h.other_description
                                                             : h.completion_option ===
                                                               "positive"
-                                                            ? "Pozytywnie"
+                                                            ? "Uznana przez producenta"
                                                             : h.completion_option ===
                                                               "negative"
-                                                            ? "Negatywnie"
+                                                            ? "Odrzucona"
                                                             : "—"}
                                                     </p>
                                                 </motion.div>

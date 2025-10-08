@@ -70,9 +70,9 @@ export async function POST(req: Request) {
                     c.completion_option === "other"
                         ? c.other_description
                         : c.completion_option === "positive"
-                        ? "Pozytywnie"
+                        ? "Uznana przez producenta"
                         : c.completion_option === "negative"
-                        ? "Negatywnie"
+                        ? "Odrzucona"
                         : "—";
 
                 const createdAt = new Date(c.created_at);
@@ -92,9 +92,9 @@ export async function POST(req: Request) {
                         <td style="padding:8px;text-align:center;">${completedAt.toLocaleDateString("pl-PL")}</td>
                         <td style="padding:8px;text-align:center;">${daysToResolve} dni</td>
                         <td style="padding:8px;text-align:center;font-weight:600;color:${
-                            resultText === "Pozytywnie"
+                            resultText === "Uznana przez producenta"
                                 ? "green"
-                                : resultText === "Negatywnie"
+                                : resultText === "Odrzucona"
                                 ? "red"
                                 : "#555"
                         };">
@@ -137,7 +137,8 @@ export async function POST(req: Request) {
 
         await transporter.sendMail({
             from: `"System Reklamacji" <${process.env.EMAIL_USER}>`,
-            to: "konradwiel@interia.pl",
+            // to: "konradwiel@interia.pl",
+            to: "kwielgorski@mebloo.pl",
             subject: `Zestawienie reklamacji - ${month.toUpperCase()}`,
             html: emailBody,
         });
